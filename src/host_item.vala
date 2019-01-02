@@ -186,12 +186,9 @@ public class HostItem : Gtk.Fixed {
 				put(editOrDone, 185,40);
 				put(inputGrid, -1000, -4000);
 			}
+			connectionName.set_markup("<b><span foreground=\"black\">" + name_in.get_text() + "</span></b>");
 
 			});
-
-		name_in.preedit_changed.connect(() => {
-			stdout.printf(name_in.get_text());
-		});
 
 
    }
