@@ -10,7 +10,7 @@ public class HostItem : Gtk.Fixed {
 
 		//set_size_request(350, 100);
 		set_redraw_on_allocate(true);
-		area.set_size_request(350, 100);
+		area.set_size_request(350, 80);
 
 		area.set_events(Gdk.EventMask.ENTER_NOTIFY_MASK |
 					    Gdk.EventMask.BUTTON_PRESS_MASK);
@@ -24,11 +24,11 @@ public class HostItem : Gtk.Fixed {
 
 		Button connect = new Gtk.Button();
 		connect.set_label("Connect");
-		put(connect, 250, 60);
+		put(connect, 250, 40);
 
 		Button editOrDone = new Gtk.Button();
 	    editOrDone.set_label("Edit");
-		put(editOrDone, 185,60);
+		put(editOrDone, 185,40);
 
 
 		Grid inputGrid = new Gtk.Grid();
@@ -134,18 +134,18 @@ public class HostItem : Gtk.Fixed {
 			remove(inputGrid);
 
 			if (expanded) {
-				area.set_size_request(350, 300);
+				area.set_size_request(350, 250);
 				editOrDone.set_label("Done");
 				put(connectionName, -1500,-1500);
-				put(connect, 250, 260);
-				put(editOrDone, 185,260);
+				put(connect, 250, 210);
+				put(editOrDone, 185,210);
 				put(inputGrid, 15, 40);
 			} else {
-				area.set_size_request(350, 100);
+				area.set_size_request(350, 80);
 			    editOrDone.set_label("Edit");
 				put(connectionName, 15,15);
-				put(connect, 250, 60);
-				put(editOrDone, 185,60);
+				put(connect, 250, 40);
+				put(editOrDone, 185,40);
 				put(inputGrid, -1000, -4000);
 			}
 
@@ -163,6 +163,36 @@ public class HostItem : Gtk.Fixed {
 
 			return true;
 		});
+
+	    editOrDone.clicked.connect(() => { toggleExpanding();
+
+			remove(connect);
+			remove(connectionName);
+			remove(editOrDone);
+			remove(inputGrid);
+
+			if (expanded) {
+				area.set_size_request(350, 250);
+				editOrDone.set_label("Done");
+				put(connectionName, -1500,-1500);
+				put(connect, 250, 210);
+				put(editOrDone, 185,210);
+				put(inputGrid, 15, 40);
+			} else {
+				area.set_size_request(350, 80);
+			    editOrDone.set_label("Edit");
+				put(connectionName, 15,15);
+				put(connect, 250, 40);
+				put(editOrDone, 185,40);
+				put(inputGrid, -1000, -4000);
+			}
+
+			});
+
+		name_in.preedit_changed.connect(() => {
+			stdout.printf(name_in.get_text());
+		});
+
 
    }
 
