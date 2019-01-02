@@ -1,9 +1,0 @@
-[default]
-name=Default
-device=local
-runtime=host
-config-opts=
-prefix=/home/migo/.cache/gnome-builder/install/PostCix/host
-app-id=org.gnome.Postcix
-default=true
-
