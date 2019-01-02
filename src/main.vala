@@ -4,15 +4,23 @@ using Gdk;
 
 
 public class Application : Gtk.Window {
+    Grid grid = new Gtk.Grid();
+
 	public Application() {
 
 		destroy.connect(Gtk.main_quit);
 		title = "PostgreSQL Client";
-		set_default_size(720,560);
+		set_default_size(700,420);
 		window_position = Gtk.WindowPosition.CENTER;
+
 		Grid layoutGrid = new Gtk.Grid();
 
-		Grid grid = new Gtk.Grid();
+		layoutGrid.set_column_spacing(4);
+		layoutGrid.set_row_spacing(4);
+
+		layoutGrid.set_row_homogeneous(false);
+		layoutGrid.set_column_homogeneous(false);
+
 		grid.set_row_homogeneous(false);
 		grid.set_column_homogeneous(false);
 
@@ -21,8 +29,8 @@ public class Application : Gtk.Window {
 
 		Pixbuf pixbuf;
 		try {
-		  pixbuf = new Gdk.Pixbuf.from_file(".postico/img/logo.png");
-		  pixbuf = pixbuf.scale_simple(300, 300, Gdk.InterpType.BILINEAR);
+		  pixbuf = new Gdk.Pixbuf.from_file(".postcix/img/baby.png");
+		  pixbuf = pixbuf.scale_simple(300, 250, Gdk.InterpType.BILINEAR);
 		 } catch (Error e) {
 		 	return ;
 		 }
@@ -30,33 +38,56 @@ public class Application : Gtk.Window {
 		Image logo = new Gtk.Image();
 		logo.set_from_pixbuf(pixbuf);
 	//	logo.set_from_file(".postico/img/logo.png");
-
-		layoutGrid.attach(logo, 0, 1, 1, 1);
+        Box logoBox = new Gtk.Box(Gtk.Orientation.VERTICAL,10);
+        logoBox.margin_left = 15;
+        logoBox.margin_top = 25;
+        logoBox.add(logo);
+		layoutGrid.attach(logoBox, 0, 0, 1, 1);
 
 
 		Label label = new Gtk.Label("PostgreSQL Client");
-		layoutGrid.attach(label, 0, 0, 1, 1);
+		layoutGrid.attach(label, 0, 1, 1, 1);
 
-		for (int index = 0; index < 5; index++) {
+        Box box = new Gtk.Box(Gtk.Orientation.VERTICAL,10);
+        box.margin_left = 15;
+        box.margin_top = 25;
+
+		Button favorites = new Gtk.Button.with_label("New Favorite");
+        favorites.set_size_request(150, 40);
+        box.add(favorites);
+		layoutGrid.attach(box, 0, 2, 1, 1);
+
+        Box horizontal_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 1);
+		horizontal_box.set_size_request(250,4);
+		layoutGrid.attach(horizontal_box, 0,3,1,1);
+
+		/*for (int index = 0; index < 5; index++) {
 			HostItem item = new HostItem();
 			grid.attach(item, 1, index, 1,1);
-		}
-
+		}*/
 
 		ScrolledWindow scroll = new Gtk.ScrolledWindow(null,null);
 		scroll.min_content_height = 380;
-		scroll.min_content_width = 352;
+		scroll.min_content_width = 302;
 		scroll.hexpand = true;
 		scroll.vexpand = true;
-		//scroll.shadow_type = Gtk.ShadowType.IN;
 		scroll.border_width = 10;
 		scroll.hscrollbar_policy = Gtk.PolicyType.ALWAYS;
 		scroll.add(grid);
 		scroll.show();
 
-		layoutGrid.attach(scroll, 2,1,1,1);
+		layoutGrid.attach(scroll, 2,0,1,4);
 
-		var file = File.new_for_path (".postico");
+
+        favorites.clicked.connect(()=> {
+            int index  = rowCount(grid,1);
+            grid.attach(new HostItem(), 1, index,1,1);
+			grid.show_all();
+            stdout.printf("Adding new host\n");
+            stdout.printf("children in list ? %d\n", rowCount(grid, 1));
+        });
+
+		var file = File.new_for_path (".postcix");
 
 		if (!file.query_exists()) {
 			try {
@@ -86,6 +117,17 @@ public class Application : Gtk.Window {
 
 		add(layoutGrid);
 	}
+
+
+    // get row count from grid based on a column
+	private int rowCount(Gtk.Grid grid, int column) {
+        int results = 0;
+        while(grid.get_child_at(column,results) != null) {
+            results++;
+        }
+        return results;
+	}
+
 }
 
 int main (string[] args) {
