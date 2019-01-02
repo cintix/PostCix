@@ -1,9 +1,9 @@
 {
-    "app-id": "org.gnome.Postico",
+    "app-id": "org.gnome.Postcix",
     "runtime": "org.gnome.Platform",
     "runtime-version": "3.22",
     "sdk": "org.gnome.Sdk",
-    "command": "postico",
+    "command": "postcix",
     "finish-args": [
         "--share=ipc", "--socket=x11",
         "--socket=wayland",
@@ -24,11 +24,11 @@
                 "*.la", "*.a"],
     "modules": [
         {
-            "name": "postico",
+            "name": "postcix",
             "sources": [
                     {
                         "type": "git",
-                        "url": "file:///home/migo/Projects/PostICO"
+                        "url": "file:///home/migo/Projects/Vala/PostCix"
                     }
             ]
         }
