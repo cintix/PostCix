@@ -19,8 +19,13 @@ public class Application : Gtk.Window {
 		//grid.set_hexpand(false);
 		//grid.set_size_request(400,400);
 
-		Pixbuf pixbuf = new Gdk.Pixbuf.from_file(".postico/img/logo.png");
-		pixbuf = pixbuf.scale_simple(300, 300, Gdk.InterpType.BILINEAR);
+		Pixbuf pixbuf;
+		try {
+		  pixbuf = new Gdk.Pixbuf.from_file(".postico/img/logo.png");
+		  pixbuf = pixbuf.scale_simple(300, 300, Gdk.InterpType.BILINEAR);
+		 } catch (Error e) {
+		 	return ;
+		 }
 
 		Image logo = new Gtk.Image();
 		logo.set_from_pixbuf(pixbuf);
@@ -32,7 +37,7 @@ public class Application : Gtk.Window {
 		Label label = new Gtk.Label("PostgreSQL Client");
 		layoutGrid.attach(label, 0, 0, 1, 1);
 
-		for (int index = 0; index < 15; index++) {
+		for (int index = 0; index < 5; index++) {
 			HostItem item = new HostItem();
 			grid.attach(item, 1, index, 1,1);
 		}
@@ -54,19 +59,25 @@ public class Application : Gtk.Window {
 		var file = File.new_for_path (".postico");
 
 		if (!file.query_exists()) {
-			file.make_directory();
+			try {
+				file.make_directory();
+			} catch (Error e) {
+				return;
+			}
 		}
-
-        stdout.printf ("%s\n", file.get_path());
 
 		string cssString = ".scrollbar.vertical slider, scrollbar.vertical slider {
 								min-height: 150px;
 								min-width: 10px;
 				      }";
 
-        Gtk.CssProvider css_provider = new Gtk.CssProvider ();
-        css_provider.load_from_data(cssString, cssString.length);
-        Gtk.StyleContext.add_provider_for_screen (Gdk.Screen.get_default (), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
+		try {
+		    Gtk.CssProvider css_provider = new Gtk.CssProvider ();
+		    css_provider.load_from_data(cssString, cssString.length);
+		    Gtk.StyleContext.add_provider_for_screen (Gdk.Screen.get_default (), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
+		} catch (Error e) {
+			return;
+		}
 
 
 

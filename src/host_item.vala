@@ -2,7 +2,7 @@ using Gtk;
 using Gdk;
 
 
-public class HostItem : Gtk.Box {
+public class HostItem : Gtk.Fixed {
 	bool expanded = false;
 	DrawingArea area = new Gtk.DrawingArea();
 
@@ -15,40 +15,39 @@ public class HostItem : Gtk.Box {
 		area.set_events(Gdk.EventMask.ENTER_NOTIFY_MASK |
 					    Gdk.EventMask.BUTTON_PRESS_MASK);
 
-		Fixed layout = new Gtk.Fixed();
-
-		layout.put(area, 0,0);
-		Label connectionName = new Gtk.Label("#Unnamed");
+		put(area, 0,0);
+		Label connectionName = new Gtk.Label("");
 		connectionName.set_size_request(300, 12);
-		connectionName.set_markup("<b><span foreground=\"black\">#Unnamed</span></b>");
+		connectionName.set_markup("<b><span foreground=\"black\">localhost</span></b>");
 		connectionName.set_alignment(0,0);
-		layout.put(connectionName, 15,15);
+		put(connectionName, 15,15);
 
 		Button connect = new Gtk.Button();
 		connect.set_label("Connect");
-		layout.put(connect, 250, 60);
+		put(connect, 250, 60);
 
 		Button editOrDone = new Gtk.Button();
 	    editOrDone.set_label("Edit");
-		layout.put(editOrDone, 185,60);
+		put(editOrDone, 185,60);
 
 
 		area.button_press_event.connect((event) => {
 			toggleExpanding();
+
+			remove(connect);
+			remove(editOrDone);
+
 			if (expanded) {
 				area.set_size_request(350, 300);
-				//set_size_request(350, 300);
 				editOrDone.set_label("Done");
-				layout.put(connect, 250, 260);
-				layout.put(editOrDone, 185,260);
+				put(connect, 250, 260);
+				put(editOrDone, 185,260);
 			} else {
 				area.set_size_request(350, 100);
-				//set_size_request(350, 100);
 			    editOrDone.set_label("Edit");
-				layout.put(connect, 250, 60);
-				layout.put(editOrDone, 185,60);
+				put(connect, 250, 60);
+				put(editOrDone, 185,60);
 			}
-
 
 			return false;
 		});
@@ -59,15 +58,13 @@ public class HostItem : Gtk.Box {
 			int width = area.get_allocated_width ();
 
 			draw_rounded_path(context,5,5, width - 10, height -10, 6);
-			//set_color (context, 212,191,224);
 			set_color (context, 198,198,198);
 			context.fill();
 
 			return true;
 		});
 
-		layout.show();
-		add(layout);
+		show();
 
    }
 
