@@ -13,6 +13,9 @@ public class Application : Gtk.Window {
 		Grid layoutGrid = new Gtk.Grid();
 
 		Grid grid = new Gtk.Grid();
+		grid.set_row_homogeneous(false);
+		grid.set_column_homogeneous(false);
+
 		//grid.set_hexpand(false);
 		//grid.set_size_request(400,400);
 
@@ -59,7 +62,7 @@ public class Application : Gtk.Window {
 		string cssString = ".scrollbar.vertical slider, scrollbar.vertical slider {
 								min-height: 150px;
 								min-width: 10px;
-				      } ";
+				      }";
 
         Gtk.CssProvider css_provider = new Gtk.CssProvider ();
         css_provider.load_from_data(cssString, cssString.length);
@@ -78,7 +81,6 @@ int main (string[] args) {
     Gtk.init (ref args);
 
     Application postIco = new Application ();
-	//Gtk.Settings.get_default().gtk_theme_name = "win32";
     postIco.show_all();
 
     Gtk.main ();

@@ -8,20 +8,48 @@ public class HostItem : Gtk.Box {
 
 	public HostItem () {
 
+		//set_size_request(350, 100);
+		set_redraw_on_allocate(true);
 		area.set_size_request(350, 100);
-
 
 		area.set_events(Gdk.EventMask.ENTER_NOTIFY_MASK |
 					    Gdk.EventMask.BUTTON_PRESS_MASK);
+
+		Fixed layout = new Gtk.Fixed();
+
+		layout.put(area, 0,0);
+		Label connectionName = new Gtk.Label("#Unnamed");
+		connectionName.set_size_request(300, 12);
+		connectionName.set_markup("<b><span foreground=\"black\">#Unnamed</span></b>");
+		connectionName.set_alignment(0,0);
+		layout.put(connectionName, 15,15);
+
+		Button connect = new Gtk.Button();
+		connect.set_label("Connect");
+		layout.put(connect, 250, 60);
+
+		Button editOrDone = new Gtk.Button();
+	    editOrDone.set_label("Edit");
+		layout.put(editOrDone, 185,60);
+
 
 		area.button_press_event.connect((event) => {
 			toggleExpanding();
 			if (expanded) {
 				area.set_size_request(350, 300);
+				//set_size_request(350, 300);
+				editOrDone.set_label("Done");
+				layout.put(connect, 250, 260);
+				layout.put(editOrDone, 185,260);
 			} else {
 				area.set_size_request(350, 100);
-				Label connectionName = new Gtk.Label("#Unnamed");
+				//set_size_request(350, 100);
+			    editOrDone.set_label("Edit");
+				layout.put(connect, 250, 60);
+				layout.put(editOrDone, 185,60);
 			}
+
+
 			return false;
 		});
 
@@ -34,10 +62,13 @@ public class HostItem : Gtk.Box {
 			//set_color (context, 212,191,224);
 			set_color (context, 198,198,198);
 			context.fill();
+
 			return true;
 		});
 
-		this.pack_start(area,false,false);
+		layout.show();
+		add(layout);
+
    }
 
    private void toggleExpanding() {
