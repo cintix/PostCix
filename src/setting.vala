@@ -35,8 +35,8 @@ public class Setting : Object {
 
 			return true;
 		} catch (Error e) {
-
 		}
+
 		return false;
 	}
 
