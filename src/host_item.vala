@@ -13,7 +13,7 @@ public class HostItem : Gtk.Fixed {
 	public string username;
 	public string password;
 	public string database_name;
-
+	public Button editOrDone;
 
 
 	public HostItem () {
@@ -36,7 +36,7 @@ public class HostItem : Gtk.Fixed {
 		connect.set_label("Connect");
 		put(connect, 250, 40);
 
-		Button editOrDone = new Gtk.Button();
+		editOrDone = new Gtk.Button();
 	    editOrDone.set_label("Edit");
 		put(editOrDone, 185,40);
 
@@ -185,7 +185,17 @@ public class HostItem : Gtk.Fixed {
 			this.password = pass_in.get_text();
 			this.database_name = database_in.get_text();
 
+
+
   	   });
+
+		this.nickname = name_in.get_text();
+		this.host = host_in.get_text();
+		this.port = int.parse(port_in.get_text());
+		this.username = username_in.get_text();
+		this.password = pass_in.get_text();
+		this.database_name = database_in.get_text();
+
 
    }
 

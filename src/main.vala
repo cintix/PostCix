@@ -4,6 +4,8 @@ using Gdk;
 
 
 public class Application : Gtk.Window {
+
+    Setting settings = new Setting(File.new_for_path (".postcix/settings.conf"));
     Grid grid = new Gtk.Grid();
 
 	public Application() {
@@ -73,6 +75,22 @@ public class Application : Gtk.Window {
             int index  = row_count(grid,1);
 
             HostItem item = new HostItem();
+            item.editOrDone.clicked.connect(() => {
+			    int results = 0;
+			    bool is_first_host = false;
+
+				while(grid.get_child_at(1,results) != null) {
+					HostItem _item = (HostItem) grid.get_child_at(1,results);
+					settings.write_host_item(_item, is_first_host);
+
+					if (!is_first_host) {
+						is_first_host = !is_first_host;
+					}
+
+					results++;
+				}
+            });
+
 			item.button_press_event.connect((event) => {
 				if (event.type == EventType.BUTTON_PRESS && event.button == 3) {
 					Gtk.Menu menu = new Gtk.Menu ();
@@ -84,14 +102,27 @@ public class Application : Gtk.Window {
 
 					menu_item.button_press_event.connect((event) => {
 						if (event.type == EventType.BUTTON_PRESS && event.button != 3) {
-							grid.remove(item);
+
+							int host_item_index = find_index_of_item(grid, item, 1);
+							stdout.printf("host item %s have index %d\n", item.nickname, host_item_index);
+
+							if (host_item_index != -1) {
+								grid.remove_row(host_item_index);
+							}
+
 							grid.show_all();
 
-							Setting settings = new Setting(File.new_for_path (".postcix/settings.conf"));
    						    int results = 0;
+   						    bool is_first_host = false;
+
 							while(grid.get_child_at(1,results) != null) {
 								HostItem _item = (HostItem) grid.get_child_at(1,results);
-								stdout.printf("Do you think this work : item %s\n", _item.nickname);
+								settings.write_host_item(_item, is_first_host);
+
+								if (!is_first_host) {
+									is_first_host = !is_first_host;
+								}
+
 								results++;
 							}
 						}
@@ -102,6 +133,7 @@ public class Application : Gtk.Window {
 				return false;
 			});
 
+			settings.write_host_item(item, true);
             grid.attach(item, 1, index,1,1);
 			grid.show_all();
         });
@@ -161,6 +193,19 @@ public class Application : Gtk.Window {
 			return;
 		}
 		return;
+	}
+
+	/*
+	 *  Locate the index of the row in the grid
+	 */
+	private int find_index_of_item(Gtk.Grid grid, HostItem item, int column) {
+        int results = 0;
+        while(grid.get_child_at(column,results) != null) {
+        	HostItem _compare = (HostItem) grid.get_child_at(column, results);
+        	if (_compare == item) return results;
+            results++;
+        }
+		return -1;
 	}
 
 
