@@ -6,6 +6,16 @@ public class HostItem : Gtk.Fixed {
 	bool expanded = false;
 	DrawingArea area = new Gtk.DrawingArea();
 
+
+	public string nickname;
+	public string host;
+	public int port;
+	public string username;
+	public string password;
+	public string database_name;
+
+
+
 	public HostItem () {
 
 		//set_size_request(350, 100);
@@ -167,6 +177,13 @@ public class HostItem : Gtk.Fixed {
 			}
 
 			connectionName.set_markup("<b><span foreground=\"black\">" + name_in.get_text() + "</span></b>");
+
+			this.nickname = name_in.get_text();
+			this.host = host_in.get_text();
+			this.port = int.parse(port_in.get_text());
+			this.username = username_in.get_text();
+			this.password = pass_in.get_text();
+			this.database_name = database_in.get_text();
 
   	   });
 

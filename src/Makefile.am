@@ -1,6 +1,6 @@
 bin_PROGRAMS = postcix
 
-postcix_SOURCES = main.vala host_item.vala
+postcix_SOURCES = main.vala host_item.vala setting.vala
 postcix_CPPFLAGS = $(POSTCIX_CFLAGS)
 postcix_VALAFLAGS = --pkg gtk+-3.0 --pkg gtk+-3.0 --pkg gdk-3.0
 
