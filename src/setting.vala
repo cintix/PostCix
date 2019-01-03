@@ -4,17 +4,17 @@ using Gdk;
 
 public class Setting : Object {
 
-	private string settingsFile;
+	private File file;
 
-	public Setting(string file) {
-		this.settingsFile = file;
+	public Setting(File _file) {
+		this.file = _file;
 	}
 
 
 	public bool write_host_item (HostItem item, bool keep_old_data) {
 
 		try {
-			File file = File.new_for_path(this.settingsFile);
+
 			FileIOStream ios;
 			FileOutputStream os;
 			DataOutputStream dos;

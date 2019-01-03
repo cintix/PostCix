@@ -86,6 +86,14 @@ public class Application : Gtk.Window {
 						if (event.type == EventType.BUTTON_PRESS && event.button != 3) {
 							grid.remove(item);
 							grid.show_all();
+
+							Setting settings = new Setting(File.new_for_path (".postcix/settings.conf"));
+   						    int results = 0;
+							while(grid.get_child_at(1,results) != null) {
+								HostItem _item = (HostItem) grid.get_child_at(1,results);
+								stdout.printf("Do you think this work : item %s\n", _item.nickname);
+								results++;
+							}
 						}
 						return false;
 					});
