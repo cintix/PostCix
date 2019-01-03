@@ -24,20 +24,9 @@ public class Application : Gtk.Window {
 		grid.set_row_homogeneous(false);
 		grid.set_column_homogeneous(false);
 
-		//grid.set_hexpand(false);
-		//grid.set_size_request(400,400);
 
-		Pixbuf pixbuf;
-		try {
-		  pixbuf = new Gdk.Pixbuf.from_file(".postcix/img/baby.png");
-		  pixbuf = pixbuf.scale_simple(300, 250, Gdk.InterpType.BILINEAR);
-		 } catch (Error e) {
-		 	return ;
-		 }
+		Image logo = load_image(".postcix/img/baby.png", 300,250);
 
-		Image logo = new Gtk.Image();
-		logo.set_from_pixbuf(pixbuf);
-	//	logo.set_from_file(".postico/img/logo.png");
         Box logoBox = new Gtk.Box(Gtk.Orientation.VERTICAL,10);
         logoBox.margin_left = 15;
         logoBox.margin_top = 25;
@@ -61,6 +50,7 @@ public class Application : Gtk.Window {
 		horizontal_box.set_size_request(250,4);
 		layoutGrid.attach(horizontal_box, 0,3,1,1);
 
+
 		/*for (int index = 0; index < 5; index++) {
 			HostItem item = new HostItem();
 			grid.attach(item, 1, index, 1,1);
@@ -80,11 +70,32 @@ public class Application : Gtk.Window {
 
 
         favorites.clicked.connect(()=> {
-            int index  = rowCount(grid,1);
-            grid.attach(new HostItem(), 1, index,1,1);
+            int index  = row_count(grid,1);
+
+            HostItem item = new HostItem();
+			item.button_press_event.connect((event) => {
+				if (event.type == EventType.BUTTON_PRESS && event.button == 3) {
+					Gtk.Menu menu = new Gtk.Menu ();
+					Gtk.MenuItem menu_item = new Gtk.MenuItem.with_label ("Delete");
+					menu.attach_to_widget (item, null);
+					menu.add (menu_item);
+					menu.show_all ();
+					menu.popup_at_widget(item, Gdk.Gravity.CENTER, Gdk.Gravity.CENTER, null);
+
+					menu_item.button_press_event.connect((event) => {
+						if (event.type == EventType.BUTTON_PRESS && event.button != 3) {
+							grid.remove(item);
+							grid.show_all();
+						}
+						return false;
+					});
+
+				}
+				return false;
+			});
+
+            grid.attach(item, 1, index,1,1);
 			grid.show_all();
-            stdout.printf("Adding new host\n");
-            stdout.printf("children in list ? %d\n", rowCount(grid, 1));
         });
 
 		var file = File.new_for_path (".postcix");
@@ -97,11 +108,43 @@ public class Application : Gtk.Window {
 			}
 		}
 
-		string cssString = ".scrollbar.vertical slider, scrollbar.vertical slider {
+		string css = ".scrollbar.vertical slider, scrollbar.vertical slider {
 								min-height: 150px;
 								min-width: 10px;
 				      }";
 
+		apply_custom_css(css);
+
+
+		layoutGrid.show();
+		add(layoutGrid);
+	}
+
+
+
+	/*
+	 * Load image-file into buffer resize and convert to  image
+	 */
+	private Gtk.Image load_image(string file, int width, int height) {
+		Pixbuf pixbuf;
+
+		try {
+		  pixbuf = new Gdk.Pixbuf.from_file(file);
+		  pixbuf = pixbuf.scale_simple(width, height, Gdk.InterpType.BILINEAR);
+		 } catch (Error e) {
+		 	return null;
+		 }
+
+		Image image = new Gtk.Image();
+		image.set_from_pixbuf(pixbuf);
+		return image;
+	}
+
+
+	/*
+	 * Apply Css styles to document
+	 */
+	private void apply_custom_css(string cssString) {
 		try {
 		    Gtk.CssProvider css_provider = new Gtk.CssProvider ();
 		    css_provider.load_from_data(cssString, cssString.length);
@@ -109,22 +152,12 @@ public class Application : Gtk.Window {
 		} catch (Error e) {
 			return;
 		}
-
-
-
-
-
-
-
-//		grid.show();
-		layoutGrid.show();
-
-		add(layoutGrid);
+		return;
 	}
 
 
     // get row count from grid based on a column
-	private int rowCount(Gtk.Grid grid, int column) {
+	private int row_count(Gtk.Grid grid, int column) {
         int results = 0;
         while(grid.get_child_at(column,results) != null) {
             results++;

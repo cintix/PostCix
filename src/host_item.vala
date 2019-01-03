@@ -30,7 +30,6 @@ public class HostItem : Gtk.Fixed {
 	    editOrDone.set_label("Edit");
 		put(editOrDone, 185,40);
 
-
 		Grid inputGrid = new Gtk.Grid();
 		inputGrid.set_size_request(270, 250);
 		inputGrid.set_row_spacing(2);
@@ -126,29 +125,6 @@ public class HostItem : Gtk.Fixed {
 
 
 		area.button_press_event.connect((event) => {
-			toggleExpanding();
-
-			remove(connect);
-			remove(connectionName);
-			remove(editOrDone);
-			remove(inputGrid);
-
-			if (expanded) {
-				area.set_size_request(350, 250);
-				editOrDone.set_label("Done");
-				put(connectionName, -1500,-1500);
-				put(connect, 250, 210);
-				put(editOrDone, 185,210);
-				put(inputGrid, 15, 40);
-			} else {
-				area.set_size_request(350, 80);
-			    editOrDone.set_label("Edit");
-				put(connectionName, 15,15);
-				put(connect, 250, 40);
-				put(editOrDone, 185,40);
-				put(inputGrid, -1000, -4000);
-			}
-
 			return false;
 		});
 
@@ -164,7 +140,9 @@ public class HostItem : Gtk.Fixed {
 			return true;
 		});
 
-	    editOrDone.clicked.connect(() => { toggleExpanding();
+	    editOrDone.clicked.connect(() => {
+
+			toggle_expanding();
 
 			remove(connect);
 			remove(connectionName);
@@ -178,6 +156,7 @@ public class HostItem : Gtk.Fixed {
 				put(connect, 250, 210);
 				put(editOrDone, 185,210);
 				put(inputGrid, 15, 40);
+
 			} else {
 				area.set_size_request(350, 80);
 			    editOrDone.set_label("Edit");
@@ -186,17 +165,25 @@ public class HostItem : Gtk.Fixed {
 				put(editOrDone, 185,40);
 				put(inputGrid, -1000, -4000);
 			}
+
 			connectionName.set_markup("<b><span foreground=\"black\">" + name_in.get_text() + "</span></b>");
 
-			});
-
+  	   });
 
    }
 
-   private void toggleExpanding() {
+
+   /*
+    *  Toggle exspanding
+    */
+   private void toggle_expanding() {
    		expanded = !expanded;
    }
 
+
+   /*
+    *  Draw a rounded shape
+    */
    private void draw_rounded_path(Cairo.Context ctx, double x, double y, double width, double height, double radius) {
 	   double degrees = Math.PI / 180.0;
    	   ctx.new_sub_path();
@@ -208,6 +195,9 @@ public class HostItem : Gtk.Fixed {
    }
 
 
+   /*
+    * set color based on r/g/b
+    */
    private void set_color(Cairo.Context ctx, double red, double blue, double green) {
    	   ctx.set_source_rgb(red / 255, blue /255,green /255);
    }
