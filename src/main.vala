@@ -52,11 +52,75 @@ public class Application : Gtk.Window {
 		horizontal_box.set_size_request(250,4);
 		layoutGrid.attach(horizontal_box, 0,3,1,1);
 
+        stdout.printf("Loading settings\n");
+        int item_index = 0;
 
-		/*for (int index = 0; index < 5; index++) {
-			HostItem item = new HostItem();
-			grid.attach(item, 1, index, 1,1);
-		}*/
+        foreach (HostItem hi in settings.read_host_items()) {
+
+            hi.editOrDone.clicked.connect(() => {
+			    int results = 0;
+			    bool is_first_host = false;
+
+				while(grid.get_child_at(1,results) != null) {
+					HostItem _item = (HostItem) grid.get_child_at(1,results);
+					settings.write_host_item(_item, is_first_host);
+
+					if (!is_first_host) {
+						is_first_host = !is_first_host;
+					}
+
+					results++;
+				}
+            });
+
+			hi.button_press_event.connect((event) => {
+				if (event.type == EventType.BUTTON_PRESS && event.button == 3) {
+					Gtk.Menu menu = new Gtk.Menu ();
+					Gtk.MenuItem menu_item = new Gtk.MenuItem.with_label ("Delete");
+					menu.attach_to_widget (hi, null);
+					menu.add (menu_item);
+					menu.show_all ();
+					menu.popup_at_widget(hi, Gdk.Gravity.CENTER, Gdk.Gravity.CENTER, null);
+
+					menu_item.button_press_event.connect((event) => {
+						if (event.type == EventType.BUTTON_PRESS && event.button != 3) {
+
+							int host_item_index = find_index_of_item(grid, hi, 1);
+							stdout.printf("host item %s have index %d\n", hi.nickname, host_item_index);
+
+							if (host_item_index != -1) {
+								grid.remove_row(host_item_index);
+							}
+
+							grid.show_all();
+
+   						    int results = 0;
+   						    bool is_first_host = false;
+
+							while(grid.get_child_at(1,results) != null) {
+								HostItem _item = (HostItem) grid.get_child_at(1,results);
+								settings.write_host_item(_item, is_first_host);
+
+								if (!is_first_host) {
+									is_first_host = !is_first_host;
+								}
+
+								results++;
+							}
+						}
+						return false;
+					});
+
+				}
+				return false;
+			});
+
+            grid.attach(hi, 1, item_index,1,1);
+            item_index++;
+        }
+
+        if (item_index > 0) grid.show_all();
+
 
 		ScrolledWindow scroll = new Gtk.ScrolledWindow(null,null);
 		scroll.min_content_height = 380;
@@ -80,7 +144,7 @@ public class Application : Gtk.Window {
 			    bool is_first_host = false;
 
 				while(grid.get_child_at(1,results) != null) {
-					HostItem _item = (HostItem) grid.get_child_at(1,results);
+					HostItem? _item = (HostItem) grid.get_child_at(1,results);
 					settings.write_host_item(_item, is_first_host);
 
 					if (!is_first_host) {
@@ -172,7 +236,7 @@ public class Application : Gtk.Window {
 		  pixbuf = new Gdk.Pixbuf.from_file(file);
 		  pixbuf = pixbuf.scale_simple(width, height, Gdk.InterpType.BILINEAR);
 		 } catch (Error e) {
-		 	return null;
+		 	return new Gtk.Image();
 		 }
 
 		Image image = new Gtk.Image();
@@ -223,8 +287,12 @@ public class Application : Gtk.Window {
 int main (string[] args) {
     Gtk.init (ref args);
 
-    Application postIco = new Application ();
-    postIco.show_all();
+//    Application postcix = new Application ();
+//    postcix.show_all();
+//
+    PostgreSQL postgres = new PostgreSQL();
+    DatabaseView db_view = new DatabaseView();
+    db_view.show_all();
 
     Gtk.main ();
     return 0;

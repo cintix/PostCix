@@ -7,18 +7,39 @@ public class HostItem : Gtk.Fixed {
 	DrawingArea area = new Gtk.DrawingArea();
 
 
-	public string nickname;
-	public string host;
-	public int port;
-	public string username;
-	public string password;
-	public string database_name;
+	public string nickname = "localhost";
+	public string host = "localhost";
+	public int port = 5432;
+	public string username = "postgres";
+	public string password = "postgres";
+	public string database_name = "postgres";
 	public Button editOrDone;
 
+    /*
+     * New Hostitem with values
+     */
+    public HostItem.with_values(string _nickname, string _host, int _port, string _username, string _password, string _database) {
+        this.nickname = _nickname;
+        this.host = _host;
+        this.port = _port;
+        this.username = _username;
+        this.password = _password;
+        this.database_name = _database;
+        init();
+    }
 
+    /*
+     * New HostItem with default values
+     */
 	public HostItem () {
+	    init();
+    }
 
-		//set_size_request(350, 100);
+    /*
+     * setup the host
+     */
+	private void init () {
+
 		set_redraw_on_allocate(true);
 		area.set_size_request(350, 80);
 
@@ -28,7 +49,7 @@ public class HostItem : Gtk.Fixed {
 		put(area, 0,0);
 		Label connectionName = new Gtk.Label("");
 		connectionName.set_size_request(300, 12);
-		connectionName.set_markup("<b><span foreground=\"black\">localhost</span></b>");
+		connectionName.set_markup("<b><span foreground=\"black\">" + nickname + "</span></b>");
 		connectionName.set_alignment(0,0);
 		put(connectionName, 15,15);
 
@@ -52,7 +73,7 @@ public class HostItem : Gtk.Fixed {
 
 		Entry name_in = new Gtk.Entry();
 		//name_in.set_size_request(100,15);
-		name_in.set_text("localhost");
+		name_in.set_text(nickname);
 
 		inputGrid.attach(name_lbl, 0,0,1,1);
 		inputGrid.attach(name_in, 1,0,3,1);
@@ -70,7 +91,7 @@ public class HostItem : Gtk.Fixed {
 
 
 		Entry host_in = new Gtk.Entry();
-		host_in.set_text("localhost");
+		host_in.set_text(host);
 
 		inputGrid.attach(host_lbl, 0,2,1,1);
 		inputGrid.attach(host_in, 1,2,1,1);
@@ -85,7 +106,7 @@ public class HostItem : Gtk.Fixed {
 		Entry port_in = new Gtk.Entry();
 		port_in.set_size_request(10,15);
 		port_in.set_width_chars(5);
-		port_in.set_text("5432");
+		port_in.set_text(port.to_string());
 
 		inputGrid.attach(port_lbl, 2,2,1,1);
 		inputGrid.attach(port_in, 3,2,1,1);
@@ -101,7 +122,7 @@ public class HostItem : Gtk.Fixed {
 
 		Entry username_in = new Gtk.Entry();
 		//name_in.set_size_request(100,15);
-		username_in.set_text("postgres");
+		username_in.set_text(username);
 
 		inputGrid.attach(username_lbl, 0,4,1,1);
 		inputGrid.attach(username_in, 1,4,2,1);
@@ -112,7 +133,7 @@ public class HostItem : Gtk.Fixed {
 
 		Entry pass_in = new Gtk.Entry();
 		//name_in.set_size_request(100,15);
-		pass_in.set_text("postgres");
+		pass_in.set_text(password);
 		pass_in.set_invisible_char('*');
 		pass_in.set_visibility(false);
 
@@ -125,7 +146,7 @@ public class HostItem : Gtk.Fixed {
 
 		Entry database_in = new Gtk.Entry();
 		//name_in.set_size_request(100,15);
-		database_in.set_text("postgres");
+		database_in.set_text(password);
 
 		inputGrid.attach(database_lbl, 0,6,1,1);
 		inputGrid.attach(database_in, 1,6,2,1);
@@ -188,13 +209,6 @@ public class HostItem : Gtk.Fixed {
 
 
   	   });
-
-		this.nickname = name_in.get_text();
-		this.host = host_in.get_text();
-		this.port = int.parse(port_in.get_text());
-		this.username = username_in.get_text();
-		this.password = pass_in.get_text();
-		this.database_name = database_in.get_text();
 
 
    }
