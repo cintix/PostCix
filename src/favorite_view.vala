@@ -146,11 +146,10 @@ public class FavoriteWindow : Gtk.Window {
 	private bool connect_to_favorite(HostItem item) {
 		stdout.printf("connecting to %s\n", item.nickname);
 		PostgreSQL db_connection = new PostgreSQL.with_host(item);
-		DatabaseView db_view = new DatabaseView();
+		DatabaseView db_view = new DatabaseView(this, db_connection, item);
 		stdout.printf("creating database view for %s\n", item.nickname);
 		db_view.show_all();
-		this.close;
-		return false;
+		return true;
 	}
 
 	private bool delete_favorite(Gdk.EventButton event, HostItem item) {
