@@ -30,7 +30,7 @@ public class Application : Gtk.Window {
 		Image logo = load_image(".postcix/img/baby.png", 300,250);
 
         Box logoBox = new Gtk.Box(Gtk.Orientation.VERTICAL,10);
-        logoBox.margin_left = 15;
+        logoBox.margin_start = 15;
         logoBox.margin_top = 25;
         logoBox.add(logo);
 		layoutGrid.attach(logoBox, 0, 0, 1, 1);
@@ -40,7 +40,7 @@ public class Application : Gtk.Window {
 		layoutGrid.attach(label, 0, 1, 1, 1);
 
         Box box = new Gtk.Box(Gtk.Orientation.VERTICAL,10);
-        box.margin_left = 15;
+        box.margin_start = 15;
         box.margin_top = 25;
 
 		Button favorites = new Gtk.Button.with_label("New Favorite");
@@ -289,8 +289,9 @@ int main (string[] args) {
 
 //    Application postcix = new Application ();
 //    postcix.show_all();
-//
-    PostgreSQL postgres = new PostgreSQL();
+
+    HostItem? fake_item = new HostItem.with_values("localhost", "localhost", 5432, "migo","", "migo");
+    PostgreSQL postgres = new PostgreSQL.with_host(fake_item);
     DatabaseView db_view = new DatabaseView();
     db_view.show_all();
 
