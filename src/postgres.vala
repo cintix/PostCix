@@ -18,13 +18,20 @@ public class PostgreSQL : Object {
         this.item = _item;
         this.database = Postgres.set_db_login(item.host, item.port.to_string(), "", "", item.database_name, item.username, item.password);
 
+		stdout.printf("Logging in to database %s \n", _item.database_name);
+
+		stdout.printf("db status: %s \n", database.get_status ().to_string());
+		stdout.printf("db status: %s \n",database.get_error_message ());
+
         /* Check to see that the backend connection was successfully made */
         if (database.get_status () != ConnectionStatus.OK) {
             stderr.printf ("Connection to database failed: %s", database.get_error_message ());
             return ;
         }
 
-        Result res = database.exec ("select * from channel;");
+		stdout.printf("Connected to %s \n", _item.database_name);
+
+        Result res = database.exec ("select * from service_manager;");
 
         if (res.get_status () != ExecStatus.TUPLES_OK) {
             stderr.printf ("SQL failed: %s", database.get_error_message ());
@@ -50,5 +57,9 @@ public class PostgreSQL : Object {
 
     }
 
-
-}
+   ~PostgreSQL() {
+		if (database != null) {
+			database.reset();
+		}
+   }
+ }

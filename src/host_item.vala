@@ -14,7 +14,7 @@ public class HostItem : Gtk.Fixed {
 	public string password = "postgres";
 	public string database_name = "postgres";
 	public Button editOrDone;
-
+	public Button connectBtn;
     /*
      * New Hostitem with values
      */
@@ -53,9 +53,9 @@ public class HostItem : Gtk.Fixed {
 		connectionName.set_alignment(0,0);
 		put(connectionName, 15,15);
 
-		Button connect = new Gtk.Button();
-		connect.set_label("Connect");
-		put(connect, 250, 40);
+		connectBtn = new Gtk.Button();
+		connectBtn.set_label("Connect");
+		put(connectBtn, 250, 40);
 
 		editOrDone = new Gtk.Button();
 	    editOrDone.set_label("Edit");
@@ -175,7 +175,7 @@ public class HostItem : Gtk.Fixed {
 
 			toggle_expanding();
 
-			remove(connect);
+			remove(connectBtn);
 			remove(connectionName);
 			remove(editOrDone);
 			remove(inputGrid);
@@ -184,7 +184,7 @@ public class HostItem : Gtk.Fixed {
 				area.set_size_request(350, 250);
 				editOrDone.set_label("Done");
 				put(connectionName, -1500,-1500);
-				put(connect, 250, 210);
+				put(connectBtn, 250, 210);
 				put(editOrDone, 185,210);
 				put(inputGrid, 15, 40);
 
@@ -192,7 +192,7 @@ public class HostItem : Gtk.Fixed {
 				area.set_size_request(350, 80);
 			    editOrDone.set_label("Edit");
 				put(connectionName, 15,15);
-				put(connect, 250, 40);
+				put(connectBtn, 250, 40);
 				put(editOrDone, 185,40);
 				put(inputGrid, -1000, -4000);
 			}

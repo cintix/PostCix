@@ -10,10 +10,17 @@ public class DatabaseView : Gtk.Window {
 
 	public DatabaseView() {
 
-		destroy.connect(Gtk.main_quit);
+		destroy.connect(this.close);
 		title = "PostgreSQL Client";
 		set_default_size(800,600);
 		window_position = Gtk.WindowPosition.CENTER;
+	}
+
+
+	public void close_and_show_favorits() {
+		FavoriteWindow favorite = new FavoriteWindow ();
+        favorite.show_all();
+		this.close;
 	}
 
 }
