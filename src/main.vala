@@ -287,10 +287,11 @@ public class Application : Gtk.Window {
 int main (string[] args) {
     Gtk.init (ref args);
 
-//    Application postcix = new Application ();
-//    postcix.show_all();
+/*    Application postcix = new Application ();
+    postcix.show_all();
+*/
 
-    HostItem? fake_item = new HostItem.with_values("localhost", "localhost", 5432, "migo","", "migo");
+    HostItem? fake_item = new HostItem.with_values("epg - local", "localhost", 5432, "epg_child_user","epgpass", "egpcore_child");
     PostgreSQL postgres = new PostgreSQL.with_host(fake_item);
     DatabaseView db_view = new DatabaseView();
     db_view.show_all();

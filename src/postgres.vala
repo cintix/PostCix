@@ -24,7 +24,7 @@ public class PostgreSQL : Object {
             return ;
         }
 
-        Result res = database.exec ("select * from test;");
+        Result res = database.exec ("select * from channel;");
 
         if (res.get_status () != ExecStatus.TUPLES_OK) {
             stderr.printf ("SQL failed: %s", database.get_error_message ());
@@ -45,6 +45,8 @@ public class PostgreSQL : Object {
             }
             stdout.printf ("\n");
         }
+
+        stdout.printf("\n[%d Rows...]\n", res.get_n_tuples());
 
     }
 
