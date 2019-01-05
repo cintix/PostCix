@@ -31,7 +31,7 @@ public class PostgreSQL : Object {
 
 		stdout.printf("Connected to %s \n", _item.database_name);
 
-        Result res = database.exec ("select * from service_manager;");
+        Result res = database.exec ("select * from test;");
 
         if (res.get_status () != ExecStatus.TUPLES_OK) {
             stderr.printf ("SQL failed: %s", database.get_error_message ());
