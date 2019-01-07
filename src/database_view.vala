@@ -49,21 +49,25 @@ public class DatabaseView : Gtk.Window {
 
 		grid.attach(bar,0,0,1,1);
 
-
-		Image databases = imanager.load_image(".postcix/img/databases.png", 24,24);
 		database_list = database.get_databases();
-		Gtk.ListStore liststore = new Gtk.ListStore (1, typeof (string));
+		Gtk.ListStore liststore = new Gtk.ListStore (2, typeof (Pixbuf), typeof (string));
 
 		for (int i = 0; i < database_list.length; i++){
 			Gtk.TreeIter iter;
 			liststore.append (out iter);
-			liststore.set (iter, 0, database_list[i]);
+			liststore.set (iter, 0, imanager.load_image_into_buffer(".postcix/img/databases.png", 20,20),1, database_list[i]);
 		}
 
 		Gtk.ComboBox combobox = new Gtk.ComboBox.with_model (liststore);
+
 		Gtk.CellRendererText cell = new Gtk.CellRendererText ();
+		Gtk.CellRendererPixbuf cell_pb = new Gtk.CellRendererPixbuf ();
+
+		combobox.pack_start (cell_pb, false);
 		combobox.pack_start (cell, false);
-		combobox.set_attributes (cell, "text", 0);
+
+		combobox.set_attributes (cell_pb, "pixbuf", 0);
+		combobox.set_attributes (cell, "text", 1);
 
 		for (int i = 0; i <database_list.length; i++) {
 		    if (item.database_name == database_list[i]) {
