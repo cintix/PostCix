@@ -3,7 +3,7 @@ using Gtk;
 using Gdk;
 
 
-public class DatabaseView : Gtk.Window {
+public class DatabaseView : Gtk.ApplicationWindow {
 
 	FavoriteWindow favorite;
 	PostgreSQL database;
@@ -13,6 +13,9 @@ public class DatabaseView : Gtk.Window {
     Setting settings = new Setting(File.new_for_path (".postcix/settings.conf"));
     Grid grid = new Gtk.Grid();
 	Gtk.TreeView treeview;
+
+	string[] database_list;
+	int selected_database_index = 0;
 
 
     /*
@@ -48,18 +51,30 @@ public class DatabaseView : Gtk.Window {
 
 
 		Image databases = imanager.load_image(".postcix/img/databases.png", 24,24);
+		database_list = database.get_databases();
+		Gtk.ListStore liststore = new Gtk.ListStore (1, typeof (string));
 
-		ToolButton database_button = new ToolButton (databases, null);
-		database_button.set_size_request(25,25);
-
-		Gtk.Menu database_menu = new Gtk.Menu();
-		string[] database_list = database.get_databases();
-		foreach(string db in database_list) {
-			database_menu.append(new Gtk.MenuItem.with_label(db));
+		for (int i = 0; i < database_list.length; i++){
+			Gtk.TreeIter iter;
+			liststore.append (out iter);
+			liststore.set (iter, 0, database_list[i]);
 		}
 
-		bar.add(database_button);
+		Gtk.ComboBox combobox = new Gtk.ComboBox.with_model (liststore);
+		Gtk.CellRendererText cell = new Gtk.CellRendererText ();
+		combobox.pack_start (cell, false);
+		combobox.set_attributes (cell, "text", 0);
 
+		for (int i = 0; i <database_list.length; i++) {
+		    if (item.database_name == database_list[i]) {
+		        combobox.set_active (i);
+		        selected_database_index = i;
+		    }
+		}
+
+        combobox.changed.connect(change_database);
+
+		bar.add(combobox);
 
 		// Toolbar content:
 		Gtk.Image img = new Gtk.Image.from_icon_name ("document-open", Gtk.IconSize.SMALL_TOOLBAR);
@@ -114,8 +129,12 @@ public class DatabaseView : Gtk.Window {
 
 	}
 
-	public void change_database(string database_name) {
-		print("switching to database %s \n", database_name);
+	public void change_database(Gtk.ComboBox combo) {
+		if (combo.get_active () !=selected_database_index) {
+		    print("switching to database %s \n", database_list[combo.get_active ()]);
+		    selected_database_index = combo.get_active();
+		    combo.set_active(selected_database_index);
+		}
 	}
 
     private void setup_treeview (TreeView view) {
@@ -142,22 +161,24 @@ public class DatabaseView : Gtk.Window {
 		Pixbuf table_icon = imanager.load_image_into_buffer(".postcix/img/table_icon.png", 16,16);
         DatabaseItem[] table_items = database.get_tables();
 
-		foreach(DatabaseItem item in table_items) {
-			if (item.schema == "public") {
-				print("Table %s is in public\n", item.name);
+		foreach(DatabaseItem _item in table_items) {
+			if (_item.schema == "public") {
+				print("Table %s is in public\n", _item.name);
 		        store.append (out root, null);
-		        store.set(root,0,table_icon, 1, item.name, -1);
+		        store.set(root,0,table_icon, 1, _item.name, -1);
 			}
 		}
 
 		Pixbuf view_icon = imanager.load_image_into_buffer(".postcix/img/view_icon.png", 16,16);
         DatabaseItem[] view_items = database.get_tables();
 
-		foreach(DatabaseItem item in view_items) {
-			if (item.schema == "public") {
-				print("Views %s is in public\n", item.name);
+        print ("views  ? %d\n", view_items.length );
+
+		foreach(DatabaseItem _item in view_items) {
+			if (_item.schema == "public") {
+				print("Views %s is in public\n", _item.name);
 		        store.append (out root, null);
-		        store.set(root,0,view_icon, 1, item.name, -1);
+		        store.set(root,0,view_icon, 1, _item.name, -1);
 			}
 		}
 
@@ -170,18 +191,18 @@ public class DatabaseView : Gtk.Window {
 		store.append(out root, null);
         store.set(root,0, folder_icon, 1,"information_schema", -1);
 
-		foreach(DatabaseItem item in table_items) {
-			if (item.schema == "information_schema") {
+		foreach(DatabaseItem _item in table_items) {
+			if (_item.schema == "information_schema") {
 		        store.append (out schema_iter, root);
-		        store.set(schema_iter,0,table_icon, 1, item.name, -1);
+		        store.set(schema_iter,0,table_icon, 1, _item.name, -1);
 			}
 		}
 
 
-		foreach(DatabaseItem item in view_items) {
-			if (item.schema == "information_schema") {
+		foreach(DatabaseItem _item in view_items) {
+			if (_item.schema == "information_schema") {
 		        store.append (out schema_iter, root);
-		        store.set(schema_iter,0,view_icon, 1, item.name, -1);
+		        store.set(schema_iter,0,view_icon, 1, _item.name, -1);
 			}
 		}
 
@@ -193,18 +214,18 @@ public class DatabaseView : Gtk.Window {
 		store.append(out root, null);
         store.set(root,0, folder_icon, 1,"pg_catalog", -1);
 
-		foreach(DatabaseItem item in table_items) {
-			if (item.schema == "pg_catalog") {
+		foreach(DatabaseItem _item in table_items) {
+			if (_item.schema == "pg_catalog") {
 		        store.append (out schema_iter, root);
-		        store.set(schema_iter,0,table_icon, 1, item.name, -1);
+		        store.set(schema_iter,0,table_icon, 1, _item.name, -1);
 			}
 		}
 
 
-		foreach(DatabaseItem item in view_items) {
-			if (item.schema == "pg_catalog") {
+		foreach(DatabaseItem _item in view_items) {
+			if (_item.schema == "pg_catalog") {
 		        store.append (out schema_iter, root);
-		        store.set(schema_iter,0,view_icon, 1, item.name, -1);
+		        store.set(schema_iter,0,view_icon, 1, _item.name, -1);
 			}
 		}
 
