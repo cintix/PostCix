@@ -3,7 +3,7 @@ using Gtk;
 using Gdk;
 
 
-public class DatabaseView : Gtk.ApplicationWindow {
+public class DatabaseView : Gtk.Window {
 
 	FavoriteWindow favorite;
 	PostgreSQL database;
