@@ -47,9 +47,24 @@ public class DatabaseView : Gtk.Window {
 		grid.attach(bar,0,0,1,1);
 
 
+		Image databases = imanager.load_image(".postcix/img/databases.png", 24,24);
+
+		ToolButton database_button = new ToolButton (databases, null);
+		database_button.set_size_request(25,25);
+
+		Gtk.Menu database_menu = new Gtk.Menu();
+		string[] database_list = database.get_databases();
+		foreach(string db in database_list) {
+			database_menu.append(new Gtk.MenuItem.with_label(db));
+		}
+
+		bar.add(database_button);
+
+
 		// Toolbar content:
 		Gtk.Image img = new Gtk.Image.from_icon_name ("document-open", Gtk.IconSize.SMALL_TOOLBAR);
 		Gtk.ToolButton button1 = new Gtk.ToolButton (img, null);
+
 		button1.clicked.connect (() => {
 			print ("Button 1\n");
 		});
@@ -99,6 +114,10 @@ public class DatabaseView : Gtk.Window {
 
 	}
 
+	public void change_database(string database_name) {
+		print("switching to database %s \n", database_name);
+	}
+
     private void setup_treeview (TreeView view) {
 
         Gtk.TreeStore store = new TreeStore (2, typeof(Pixbuf),  typeof (string));
@@ -114,6 +133,11 @@ public class DatabaseView : Gtk.Window {
 
         view.insert_column_with_attributes (-1, "Icon", new CellRendererPixbuf (), "pixbuf", 0, null);
         view.insert_column_with_attributes (-1, "Name", new CellRendererText (), "text", 1, null);
+
+		Pixbuf sql_icon = imanager.load_image_into_buffer(".postcix/img/comments-12.png", 16,16);
+        store.append (out root, null);
+        store.set(root,0,sql_icon, 1, "SQL", -1);
+
 
 		Pixbuf table_icon = imanager.load_image_into_buffer(".postcix/img/table_icon.png", 16,16);
         DatabaseItem[] table_items = database.get_tables();
