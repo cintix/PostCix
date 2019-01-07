@@ -167,20 +167,16 @@ public class DatabaseView : Gtk.Window {
 
 		foreach(DatabaseItem _item in table_items) {
 			if (_item.schema == "public") {
-				print("Table %s is in public\n", _item.name);
 		        store.append (out root, null);
 		        store.set(root,0,table_icon, 1, _item.name, -1);
 			}
 		}
 
 		Pixbuf view_icon = imanager.load_image_into_buffer(".postcix/img/view_icon.png", 16,16);
-        DatabaseItem[] view_items = database.get_tables();
-
-        print ("views  ? %d\n", view_items.length );
+        DatabaseItem[] view_items = database.get_views();
 
 		foreach(DatabaseItem _item in view_items) {
 			if (_item.schema == "public") {
-				print("Views %s is in public\n", _item.name);
 		        store.append (out root, null);
 		        store.set(root,0,view_icon, 1, _item.name, -1);
 			}
@@ -188,81 +184,40 @@ public class DatabaseView : Gtk.Window {
 
 
 		/*
-		 *  Added information_schema
+		 *  Added schema information
 		 */
 
 		Pixbuf folder_icon = imanager.load_image_into_buffer(".postcix/img/folder.png", 16,16);
-		store.append(out root, null);
-        store.set(root,0, folder_icon, 1,"information_schema", -1);
 
-		foreach(DatabaseItem _item in table_items) {
-			if (_item.schema == "information_schema") {
-		        store.append (out schema_iter, root);
-		        store.set(schema_iter,0,table_icon, 1, _item.name, -1);
-			}
-		}
+        string[] created_schemas = {"public"};
+        foreach(DatabaseItem _schema in table_items) {
+            if (_schema.schema in created_schemas) {
+                continue;
+            } else {
+                created_schemas += _schema.schema;
+		        store.append(out root, null);
+                store.set(root,0, folder_icon, 1,_schema.schema, -1);
 
-
-		foreach(DatabaseItem _item in view_items) {
-			if (_item.schema == "information_schema") {
-		        store.append (out schema_iter, root);
-		        store.set(schema_iter,0,view_icon, 1, _item.name, -1);
-			}
-		}
-
-
-		/*
-		 *  Added pg_catalog
-		 */
-
-		store.append(out root, null);
-        store.set(root,0, folder_icon, 1,"pg_catalog", -1);
-
-		foreach(DatabaseItem _item in table_items) {
-			if (_item.schema == "pg_catalog") {
-		        store.append (out schema_iter, root);
-		        store.set(schema_iter,0,table_icon, 1, _item.name, -1);
-			}
-		}
+		        foreach(DatabaseItem _item in table_items) {
+			        if (_schema.schema == _item.schema) {
+		                store.append (out schema_iter, root);
+		                store.set(schema_iter,0,table_icon, 1, _item.name, -1);
+			        }
+		        }
 
 
-		foreach(DatabaseItem _item in view_items) {
-			if (_item.schema == "pg_catalog") {
-		        store.append (out schema_iter, root);
-		        store.set(schema_iter,0,view_icon, 1, _item.name, -1);
-			}
-		}
+		        foreach(DatabaseItem _item in view_items) {
+			        if (_schema.schema == _item.schema) {
+		                store.append (out schema_iter, root);
+		                store.set(schema_iter,0,view_icon, 1, _item.name, -1);
+			        }
+		        }
 
 
-/*
-        store.set(root,0,"Tables", -1);
 
-        foreach (DatabaseItem db in database.get_tables()) {
-            if (schema != db.schema) {
-                store.append(out schema_iter, root);
-                print("Schema is now %s\n", db.schema);
-                store.set(schema_iter,0,db.schema, -1);
-                schema = db.schema;
             }
-            store.append(out table_iter, schema_iter);
-            store.set(table_iter,0,db.name, -1);
         }
-
-
-        store.append (out root, null);
-        store.set(root,0,"Views", -1);
-
-        foreach (DatabaseItem db in database.get_views()) {
-            if (schema != db.schema) {
-                store.append(out schema_iter, root);
-                store.set(schema_iter,0,db.schema, -1);
-                schema = db.schema;
-            }
-            store.append(out table_iter, schema_iter);
-            store.set(table_iter,0,db.name, -1);
-        }
-*/
-   }
+  }
 
 	public void close_and_show_favorits() {
         favorite.show_all();
