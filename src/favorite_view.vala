@@ -5,6 +5,7 @@ using Gdk;
 public class FavoriteWindow : Gtk.Window {
 
     Setting settings = new Setting(File.new_for_path (".postcix/settings.conf"));
+    ImageManager imanager = new ImageManager();
     Grid grid = new Gtk.Grid();
 
 	public FavoriteWindow() {
@@ -25,8 +26,7 @@ public class FavoriteWindow : Gtk.Window {
 		grid.set_row_homogeneous(false);
 		grid.set_column_homogeneous(false);
 
-
-		Image logo = load_image(".postcix/img/baby.png", 300,250);
+		Image logo = imanager.load_image(".postcix/img/baby.png", 300,250);
 
         Box logoBox = new Gtk.Box(Gtk.Orientation.VERTICAL,10);
         logoBox.margin_start = 15;
@@ -197,25 +197,6 @@ public class FavoriteWindow : Gtk.Window {
 
 
 	/*
-	 * Load image-file into buffer resize and convert to  image
-	 */
-	private Gtk.Image load_image(string file, int width, int height) {
-		Pixbuf pixbuf;
-
-		try {
-		  pixbuf = new Gdk.Pixbuf.from_file(file);
-		  pixbuf = pixbuf.scale_simple(width, height, Gdk.InterpType.BILINEAR);
-		 } catch (Error e) {
-		 	return new Gtk.Image();
-		 }
-
-		Image image = new Gtk.Image();
-		image.set_from_pixbuf(pixbuf);
-		return image;
-	}
-
-
-	/*
 	 * Apply Css styles to document
 	 */
 	private void apply_custom_css(string cssString) {
@@ -251,6 +232,5 @@ public class FavoriteWindow : Gtk.Window {
         }
         return results;
 	}
-
 }
 

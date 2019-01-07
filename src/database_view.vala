@@ -9,6 +9,7 @@ public class DatabaseView : Gtk.Window {
 	PostgreSQL database;
 	HostItem item;
 
+	ImageManager imanager = new ImageManager();
     Setting settings = new Setting(File.new_for_path (".postcix/settings.conf"));
     Grid grid = new Gtk.Grid();
 
@@ -68,31 +69,108 @@ public class DatabaseView : Gtk.Window {
         treeview.vexpand = true;
         treeview.height_request = paned.get_allocated_height();
 
-        paned.add1(treeview);
+		ScrolledWindow scroll_treeview = new Gtk.ScrolledWindow(null,null);
+		scroll_treeview.hexpand = true;
+		scroll_treeview.vexpand = true;
+		scroll_treeview.border_width = 2;
+		scroll_treeview.hscrollbar_policy = Gtk.PolicyType.ALWAYS;
+		scroll_treeview.add(treeview);
+		scroll_treeview.show();
+
+        paned.add1(scroll_treeview);
         paned.add2(new Gtk.Entry());
         paned.vexpand = true;
 
         grid.attach(paned,0,1,1,1);
         grid.show_all();
-
 	}
 
 
     private void setup_treeview (TreeView view) {
 
-        Gtk.TreeStore store = new TreeStore (1, typeof (string));
+        Gtk.TreeStore store = new TreeStore (2, typeof(Pixbuf),  typeof (string));
         view.set_model (store);
-
+		view.set_headers_visible(false);
 
         string schema = "";
 
-        TreeIter root;
-        TreeIter table_iter;
-        TreeIter view_iter;
+        TreeIter root = new TreeIter();
         TreeIter schema_iter = new TreeIter();
 
-        view.insert_column_with_attributes (-1, "Overview", new CellRendererText (), "text", 0, null);
-        store.append (out root, null);
+        view.insert_column_with_attributes (-1, "Icon", new CellRendererPixbuf (), "pixbuf", 0, null);
+        view.insert_column_with_attributes (-1, "Name", new CellRendererText (), "text", 1, null);
+
+		Pixbuf table_icon = imanager.load_image_into_buffer(".postcix/img/table_icon.png", 16,16);
+        DatabaseItem[] table_items = database.get_tables();
+
+		foreach(DatabaseItem item in table_items) {
+			if (item.schema == "public") {
+				print("Table %s is in public\n", item.name);
+		        store.append (out root, null);
+		        store.set(root,0,table_icon, 1, item.name, -1);
+			}
+		}
+
+		Pixbuf view_icon = imanager.load_image_into_buffer(".postcix/img/view_icon.png", 16,16);
+        DatabaseItem[] view_items = database.get_tables();
+
+		foreach(DatabaseItem item in view_items) {
+			if (item.schema == "public") {
+				print("Views %s is in public\n", item.name);
+		        store.append (out root, null);
+		        store.set(root,0,view_icon, 1, item.name, -1);
+			}
+		}
+
+
+		/*
+		 *  Added information_schema
+		 */
+
+		Pixbuf folder_icon = imanager.load_image_into_buffer(".postcix/img/folder.png", 16,16);
+		store.append(out root, null);
+        store.set(root,0, folder_icon, 1,"information_schema", -1);
+
+		foreach(DatabaseItem item in table_items) {
+			if (item.schema == "information_schema") {
+		        store.append (out schema_iter, root);
+		        store.set(schema_iter,0,table_icon, 1, item.name, -1);
+			}
+		}
+
+
+		foreach(DatabaseItem item in view_items) {
+			if (item.schema == "information_schema") {
+		        store.append (out schema_iter, root);
+		        store.set(schema_iter,0,view_icon, 1, item.name, -1);
+			}
+		}
+
+
+		/*
+		 *  Added pg_catalog
+		 */
+
+		store.append(out root, null);
+        store.set(root,0, folder_icon, 1,"pg_catalog", -1);
+
+		foreach(DatabaseItem item in table_items) {
+			if (item.schema == "pg_catalog") {
+		        store.append (out schema_iter, root);
+		        store.set(schema_iter,0,table_icon, 1, item.name, -1);
+			}
+		}
+
+
+		foreach(DatabaseItem item in view_items) {
+			if (item.schema == "pg_catalog") {
+		        store.append (out schema_iter, root);
+		        store.set(schema_iter,0,view_icon, 1, item.name, -1);
+			}
+		}
+
+
+/*
         store.set(root,0,"Tables", -1);
 
         foreach (DatabaseItem db in database.get_tables()) {
@@ -119,7 +197,7 @@ public class DatabaseView : Gtk.Window {
             store.append(out table_iter, schema_iter);
             store.set(table_iter,0,db.name, -1);
         }
-
+*/
    }
 
 	public void close_and_show_favorits() {

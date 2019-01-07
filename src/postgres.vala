@@ -59,7 +59,7 @@ public class PostgreSQL : Object {
     }
 
 
-    public DatabaseItem[] get_tables() {
+    public DatabaseItem[]? get_tables() {
         DatabaseItem[] list = {};
         /* Check to see that the backend connection was successfully made */
         if (database.get_status () != ConnectionStatus.OK) {
@@ -100,7 +100,7 @@ public class PostgreSQL : Object {
         return list;
     }
 
-    public DatabaseItem[] get_views() {
+    public DatabaseItem[]? get_views() {
         DatabaseItem[] list = {};
         /* Check to see that the backend connection was successfully made */
         if (database.get_status () != ConnectionStatus.OK) {
