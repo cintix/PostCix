@@ -12,8 +12,7 @@ public class ImageManager : Object {
 		Pixbuf pixbuf;
 
 		try {
-		  pixbuf = new Gdk.Pixbuf.from_file(file);
-		  pixbuf = pixbuf.scale_simple(width, height, Gdk.InterpType.BILINEAR);
+		  pixbuf = load_image_into_buffer(file, width, height);
 		 } catch (Error e) {
 		 	return new Gtk.Image();
 		 }

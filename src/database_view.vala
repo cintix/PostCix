@@ -12,6 +12,7 @@ public class DatabaseView : Gtk.Window {
 	ImageManager imanager = new ImageManager();
     Setting settings = new Setting(File.new_for_path (".postcix/settings.conf"));
     Grid grid = new Gtk.Grid();
+	Gtk.TreeView treeview;
 
 
     /*
@@ -64,7 +65,7 @@ public class DatabaseView : Gtk.Window {
         Paned paned = new Gtk.Paned (Gtk.Orientation.HORIZONTAL);
         paned.position = 210;
 
-        Gtk.TreeView treeview = new TreeView ();
+        treeview = new TreeView ();
         setup_treeview (treeview);
         treeview.vexpand = true;
         treeview.height_request = paned.get_allocated_height();
@@ -85,12 +86,26 @@ public class DatabaseView : Gtk.Window {
         grid.show_all();
 	}
 
+	private void row_click(TreePath path, TreeViewColumn column) {
+		TreeModel model;
+		TreeIter  iter;
+
+		TreeSelection selection = treeview.get_selection();
+		if (selection.get_selected(out model, out iter)) {
+			Value name;
+			model.get_value(iter,1, out name);
+			print("You clicked %s \n", name.get_string () );
+		}
+
+	}
 
     private void setup_treeview (TreeView view) {
 
         Gtk.TreeStore store = new TreeStore (2, typeof(Pixbuf),  typeof (string));
         view.set_model (store);
 		view.set_headers_visible(false);
+
+		view.row_activated.connect(row_click);
 
         string schema = "";
 
