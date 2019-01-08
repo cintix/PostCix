@@ -18,6 +18,7 @@ public class DatabaseView : Gtk.Window {
     private Paned SQLpaned = new Gtk.Paned (Gtk.Orientation.VERTICAL);
 
 	private Gtk.TreeView treeview;
+	private Gtk.TreeView treeviewResults;
 
 	private string[] database_list;
 	private int selected_database_index = 0;
@@ -139,7 +140,7 @@ public class DatabaseView : Gtk.Window {
 
 		buffer.highlight_syntax = true;
 		buffer.highlight_matching_brackets = true;
-		buffer.style_scheme = style_scheme_manager.get_scheme ("oblivion");
+		//buffer.style_scheme = style_scheme_manager.get_scheme ("oblivion");
 		buffer.language = language_manager.get_language ("sql");
 
 
@@ -163,14 +164,35 @@ public class DatabaseView : Gtk.Window {
 
 		ScrolledWindow result_window = new Gtk.ScrolledWindow (null, null);
         result_window.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
-        result_window.add (source_view);
+        result_window.add (build_result ());
         result_window.hexpand = true;
 		result_window.vexpand = true;
 
 
 
-		SQLpaned.add1(source_view_scrolled_window);
-		SQLpaned.add1(source_view_scrolled_window);
+		//SQLpaned.add1(source_view_scrolled_window);
+		//SQLpaned.add1(source_view_scrolled_window);
+
+/*
+ *
+
+ SELECT      n.nspname as schema, t.typname as type, *
+FROM        pg_type t
+LEFT JOIN   pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+WHERE       (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid))
+AND     NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid)
+AND     n.nspname NOT IN ('pg_catalog', 'information_schema');
+
+
+SELECT pg_type.typname AS enumtype,
+     pg_enum.enumlabel AS enumlabel
+ FROM pg_type
+ JOIN pg_enum
+     ON pg_enum.enumtypid = pg_type.oid;
+
+ *
+ */
+
 
         paned.add2(source_view_scrolled_window);
         paned.vexpand = true;
@@ -235,6 +257,27 @@ public class DatabaseView : Gtk.Window {
 		    setup_treeview (treeview);
 			treeview.show_all();
 		}
+	}
+
+    private TreeView build_result () {
+
+    	TreeView result_view = new TreeView();
+    	for (int i  =0; i < 10; i ++ ) {
+	        treeview.insert_column_with_attributes (-1, "Column " + i.to_string(), new CellRendererText (), "text", i, null);
+    	}
+
+        TreeIter root = new TreeIter();
+		Gtk.TreeStore store = treeview.model;
+
+        for (int j  =0; j < 100; j ++ ) {
+		    store.append (out root, null);
+			for (int i  =0; i < 10; i ++ ) {
+			    store.set(root,i,"string - " + i.to_string() + " row " + j.to_string(), 1, "String", -1);
+			}
+    	}
+
+		result_view.show_all();
+		return result_view;
 	}
 
     private void setup_treeview (TreeView view) {
