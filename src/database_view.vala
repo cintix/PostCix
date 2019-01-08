@@ -5,17 +5,22 @@ using Gdk;
 
 public class DatabaseView : Gtk.Window {
 
-	FavoriteWindow favorite;
-	PostgreSQL database;
-	HostItem item;
+ 	private SourceView source_view;
+	private SourceLanguageManager language_manager;
+	private FavoriteWindow favorite;
+	private PostgreSQL database;
+	private HostItem item;
 
-	ImageManager imanager = new ImageManager();
-    Setting settings = new Setting(File.new_for_path (".postcix/settings.conf"));
-    Grid grid = new Gtk.Grid();
-	Gtk.TreeView treeview;
+	private ImageManager imanager = new ImageManager();
+    private Setting settings = new Setting(File.new_for_path (".postcix/settings.conf"));
+    private Grid grid = new Gtk.Grid();
+    private Paned paned = new Gtk.Paned (Gtk.Orientation.HORIZONTAL);
+    private Paned SQLpaned = new Gtk.Paned (Gtk.Orientation.VERTICAL);
 
-	string[] database_list;
-	int selected_database_index = 0;
+	private Gtk.TreeView treeview;
+
+	private string[] database_list;
+	private int selected_database_index = 0;
 
 
     /*
@@ -26,6 +31,14 @@ public class DatabaseView : Gtk.Window {
 		this.favorite = _f;
 		this.database = _p;
 		this.item = _h;
+
+		print ("Listing languages \n");
+    	var ids = language_manager.get_language_ids ();
+		foreach (var id in ids) {
+		    var lang = language_manager.get_language (id);
+		    print ("lang name %s/\n", lang.name);
+		}
+
 
         foreach (string db in database.get_databases()) {
             print("Database : %s\n", db);
@@ -96,11 +109,17 @@ public class DatabaseView : Gtk.Window {
 		});
 		bar.add (button2);
 
-        Paned paned = new Gtk.Paned (Gtk.Orientation.HORIZONTAL);
         paned.position = 210;
 
         treeview = new TreeView ();
+
+        treeview.insert_column_with_attributes (-1, "Icon", new CellRendererPixbuf (), "pixbuf", 0, null);
+        treeview.insert_column_with_attributes (-1, "Name", new CellRendererText (), "text", 1, null);
+
         setup_treeview (treeview);
+
+   		treeview.row_activated.connect(row_click);
+
         treeview.vexpand = true;
         treeview.height_request = paned.get_allocated_height();
 
@@ -113,31 +132,108 @@ public class DatabaseView : Gtk.Window {
 		scroll_treeview.show();
 
         paned.add1(scroll_treeview);
-        paned.add2(new Gtk.Entry());
+
+		SourceBuffer buffer = new Gtk.SourceBuffer (null);
+		SourceStyleSchemeManager style_scheme_manager = new Gtk.SourceStyleSchemeManager ();
+		language_manager = Gtk.SourceLanguageManager.get_default ();
+
+		buffer.highlight_syntax = true;
+		buffer.highlight_matching_brackets = true;
+		buffer.style_scheme = style_scheme_manager.get_scheme ("oblivion");
+		buffer.language = language_manager.get_language ("sql");
+
+
+		source_view = new Gtk.SourceView.with_buffer (buffer);
+		source_view.key_press_event.connect(SQL_keypress);
+        source_view.set_wrap_mode (Gtk.WrapMode.WORD);
+        source_view.highlight_current_line = true;
+		source_view.indent_width = 4;
+		source_view.indent_on_tab = true;
+		source_view.show_line_numbers = true;
+        source_view.buffer.text = "";
+
+		ScrolledWindow source_view_scrolled_window = new Gtk.ScrolledWindow (null, null);
+        source_view_scrolled_window.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
+        source_view_scrolled_window.add (source_view);
+        source_view_scrolled_window.hexpand = true;
+		source_view_scrolled_window.vexpand = true;
+
+
+
+
+		ScrolledWindow result_window = new Gtk.ScrolledWindow (null, null);
+        result_window.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
+        result_window.add (source_view);
+        result_window.hexpand = true;
+		result_window.vexpand = true;
+
+
+
+		SQLpaned.add1(source_view_scrolled_window);
+		SQLpaned.add1(source_view_scrolled_window);
+
+        paned.add2(source_view_scrolled_window);
         paned.vexpand = true;
+
+
 
         grid.attach(paned,0,1,1,1);
         grid.show_all();
 	}
 
+	private bool SQL_keypress(EventKey event) {
+		print ("state: %s value : %x \n", event.state.to_string(),event.keyval);
+		if (event.state.to_string() == "GDK_CONTROL_MASK") {
+			print("Control state matched \n");
+			if (event.keyval == 0xff0d) {
+				print("executing SQL %s \n", source_view.buffer.text);
+			}
+		}
+		return false;
+	}
+
+
+
 	private void row_click(TreePath path, TreeViewColumn column) {
 		TreeModel model;
 		TreeIter  iter;
+		TreeIter  parent_iter;
 
 		TreeSelection selection = treeview.get_selection();
 		if (selection.get_selected(out model, out iter)) {
+			model.iter_parent(out parent_iter, iter);
+
 			Value name;
 			model.get_value(iter,1, out name);
-			print("You clicked %s \n", name.get_string () );
+
+			Value parent_name;
+			model.get_value(parent_iter,1, out parent_name);
+			string parent = parent_name.get_string();
+			string command;
+			if (parent != null) {
+				command = parent  + "." + name.get_string();
+			} else {
+				command =  name.get_string();
+			}
+
+			print("You clicked %s \n",command);
 		}
 
 	}
 
 	public void change_database(Gtk.ComboBox combo) {
 		if (combo.get_active () !=selected_database_index) {
+
 		    print("switching to database %s \n", database_list[combo.get_active ()]);
 		    selected_database_index = combo.get_active();
 		    combo.set_active(selected_database_index);
+
+		    HostItem hi = database.item;
+		    hi.database_name = database_list[selected_database_index];
+
+			database = new PostgreSQL.with_host(hi);
+		    setup_treeview (treeview);
+			treeview.show_all();
 		}
 	}
 
@@ -147,19 +243,15 @@ public class DatabaseView : Gtk.Window {
         view.set_model (store);
 		view.set_headers_visible(false);
 
-		view.row_activated.connect(row_click);
 
         string schema = "";
 
         TreeIter root = new TreeIter();
         TreeIter schema_iter = new TreeIter();
 
-        view.insert_column_with_attributes (-1, "Icon", new CellRendererPixbuf (), "pixbuf", 0, null);
-        view.insert_column_with_attributes (-1, "Name", new CellRendererText (), "text", 1, null);
-
 		Pixbuf sql_icon = imanager.load_image_into_buffer(".postcix/img/comments-12.png", 16,16);
         store.append (out root, null);
-        store.set(root,0,sql_icon, 1, "SQL", -1);
+        store.set(root,0,sql_icon, 1, "#SQL", -1);
 
 
 		Pixbuf table_icon = imanager.load_image_into_buffer(".postcix/img/table_icon.png", 16,16);
