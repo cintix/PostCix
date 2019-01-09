@@ -1,7 +1,7 @@
 
 using Gtk;
 using Gdk;
-
+using Postgres;
 
 public class DatabaseView : Gtk.Window {
 
@@ -33,23 +33,24 @@ public class DatabaseView : Gtk.Window {
 		this.database = _p;
 		this.item = _h;
 
-		print ("Listing languages \n");
+		GLib.print ("Listing languages \n");
     	var ids = language_manager.get_language_ids ();
 		foreach (var id in ids) {
 		    var lang = language_manager.get_language (id);
-		    print ("lang name %s/\n", lang.name);
+		    GLib.print ("lang name %s/\n", lang.name);
 		}
 
 
         foreach (string db in database.get_databases()) {
-            print("Database : %s\n", db);
+            stdout.printf("Database : %s\n", db);
         }
-        print("============================\n\n");
+        stdout.printf("============================\n\n");
 
 		destroy.connect(this.close_and_show_favorits);
 		title = "PostgreSQL - " + item.nickname;
 		set_default_size(800,600);
 		window_position = Gtk.WindowPosition.CENTER;
+		icon = imanager.load_image_into_buffer(".postcix/img/baby.png", 300,250);
 
 		favorite.hide();
 
@@ -99,20 +100,21 @@ public class DatabaseView : Gtk.Window {
 		Gtk.ToolButton button1 = new Gtk.ToolButton (img, null);
 
 		button1.clicked.connect (() => {
-			print ("Button 1\n");
+			GLib.print ("Button 1\n");
 		});
 		bar.add (button1);
 
 		img = new Gtk.Image.from_icon_name ("window-close", Gtk.IconSize.SMALL_TOOLBAR);
 		Gtk.ToolButton button2 = new Gtk.ToolButton (img, null);
 		button2.clicked.connect (() => {
-			print ("Button 2\n");
+			GLib.print ("Button 2\n");
 		});
 		bar.add (button2);
 
         paned.position = 210;
 
         treeview = new TreeView ();
+        treeviewResults = new TreeView ();
 
         treeview.insert_column_with_attributes (-1, "Icon", new CellRendererPixbuf (), "pixbuf", 0, null);
         treeview.insert_column_with_attributes (-1, "Name", new CellRendererText (), "text", 1, null);
@@ -140,7 +142,7 @@ public class DatabaseView : Gtk.Window {
 
 		buffer.highlight_syntax = true;
 		buffer.highlight_matching_brackets = true;
-		//buffer.style_scheme = style_scheme_manager.get_scheme ("oblivion");
+		buffer.style_scheme = style_scheme_manager.get_scheme ("oblivion");
 		buffer.language = language_manager.get_language ("sql");
 
 
@@ -159,20 +161,22 @@ public class DatabaseView : Gtk.Window {
         source_view_scrolled_window.hexpand = true;
 		source_view_scrolled_window.vexpand = true;
 
-
-
+		//build_result(treeviewResults, database.query("select now()"));
 
 		ScrolledWindow result_window = new Gtk.ScrolledWindow (null, null);
         result_window.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
-        result_window.add (build_result ());
+        result_window.add (treeviewResults);
         result_window.hexpand = true;
 		result_window.vexpand = true;
 
 
+		result_window.show_all();
 
-		//SQLpaned.add1(source_view_scrolled_window);
-		//SQLpaned.add1(source_view_scrolled_window);
 
+
+		SQLpaned.add1(source_view_scrolled_window);
+		SQLpaned.add2(result_window);
+		SQLpaned.position = 250;
 /*
  *
 
@@ -194,9 +198,9 @@ SELECT pg_type.typname AS enumtype,
  */
 
 
-        paned.add2(source_view_scrolled_window);
+        paned.add2(SQLpaned);
         paned.vexpand = true;
-
+		paned.show_all();
 
 
         grid.attach(paned,0,1,1,1);
@@ -204,11 +208,11 @@ SELECT pg_type.typname AS enumtype,
 	}
 
 	private bool SQL_keypress(EventKey event) {
-		print ("state: %s value : %x \n", event.state.to_string(),event.keyval);
 		if (event.state.to_string() == "GDK_CONTROL_MASK") {
-			print("Control state matched \n");
 			if (event.keyval == 0xff0d) {
-				print("executing SQL %s \n", source_view.buffer.text);
+				stdout.printf("executing SQL %s \n", source_view.buffer.text);
+				build_result(treeviewResults, database.query(source_view.buffer.text));
+				treeviewResults.columns_autosize();
 			}
 		}
 		return false;
@@ -238,7 +242,14 @@ SELECT pg_type.typname AS enumtype,
 				command =  name.get_string();
 			}
 
-			print("You clicked %s \n",command);
+			if (command != "#SQL") {
+				stdout.printf("Sending SQL to builder %s \n", command);
+				build_result(treeviewResults, database.query("select * from " + command + " limit 1000"));
+				stdout.printf("Sending SQL to builder %s \n", "select * from " + command + " limit 1000");
+				treeviewResults.columns_autosize();
+			}
+
+			stdout.printf("You clicked %s \n",command);
 		}
 
 	}
@@ -246,7 +257,7 @@ SELECT pg_type.typname AS enumtype,
 	public void change_database(Gtk.ComboBox combo) {
 		if (combo.get_active () !=selected_database_index) {
 
-		    print("switching to database %s \n", database_list[combo.get_active ()]);
+		    stdout.printf("switching to database %s \n", database_list[combo.get_active ()]);
 		    selected_database_index = combo.get_active();
 		    combo.set_active(selected_database_index);
 
@@ -259,25 +270,55 @@ SELECT pg_type.typname AS enumtype,
 		}
 	}
 
-    private TreeView build_result () {
+    private void build_result (TreeView result_view, Result res) {
+		stdout.printf("Hello anyone home ? \n");
 
-    	TreeView result_view = new TreeView();
-    	for (int i  =0; i < 10; i ++ ) {
-	        treeview.insert_column_with_attributes (-1, "Column " + i.to_string(), new CellRendererText (), "text", i, null);
+		if (result_view != null && result_view.get_columns() != null)
+		foreach(TreeViewColumn tvc in result_view.get_columns()) {
+			stdout.printf("Why am i here\n");
+			result_view.remove_column(tvc);
+		}
+
+		stdout.printf("Ahh there you are, I made a SQL\n ");
+
+		if (res == null) {
+		  stdout.printf("Sorry you have no results from the SQL \n");
+		  return;
+		} else {
+	        if (res.get_status () != ExecStatus.TUPLES_OK) {
+	        	return;
+	        }
+	  	    stdout.printf("building table from results from the SQL \n");
+        }
+
+
+
+		int nFields = res.get_n_fields ();
+		stdout.printf("fields from SQL %d \n ", nFields);
+    	GLib.Type[] column_types = new GLib.Type[nFields + 1];
+		stdout.printf("build result columns\n");
+    	for (int i  =0; i < nFields; i ++ ) {
+	        result_view.insert_column_with_attributes (-1, res.get_field_name(i), new CellRendererText (), "text", i, null);
+	        column_types[i] = typeof(string);
+	        stdout.printf("		column Column " + res.get_field_name(i) + "\n");
     	}
+		column_types[nFields] = typeof (string);
 
         TreeIter root = new TreeIter();
-		Gtk.TreeStore store = treeview.model;
+		Gtk.TreeStore store = new Gtk.TreeStore.newv(column_types);
+        result_view.set_model (store);
+        result_view.set_headers_visible(true);
 
-        for (int j  =0; j < 100; j ++ ) {
+        for (int j  =0; j < res.get_n_tuples(); j ++ ) {
 		    store.append (out root, null);
-			for (int i  =0; i < 10; i ++ ) {
-			    store.set(root,i,"string - " + i.to_string() + " row " + j.to_string(), 1, "String", -1);
+			for (int i  =0; i < nFields; i ++ ) {
+			    store.set(root,i,res.get_value(j,i), 1, "String", -1);
 			}
     	}
 
 		result_view.show_all();
-		return result_view;
+
+		stdout.printf("return new result view\n");
 	}
 
     private void setup_treeview (TreeView view) {

@@ -33,7 +33,16 @@ public class PostgreSQL : Object {
 
     }
 
+	public Result query(string sql) {
 
+        /* Check to see that the backend connection was successfully made */
+        if (database.get_status () != ConnectionStatus.OK) {
+            stderr.printf ("Connection to database failed: %s", database.get_error_message ());
+            return null;
+        }
+		stdout.printf("Executing SQL : %s\n", sql);
+		return database.exec (sql);
+	}
 
     public string[] get_databases() {
         string[] list = {};
@@ -80,23 +89,6 @@ public class PostgreSQL : Object {
              list += di;
         }
 
-/*
-        int nFields = res.get_n_fields ();
-        for (int i = 0; i < nFields; i++) {
-            stdout.printf ("%-15s", res.get_field_name (i));
-        }
-        stdout.printf ("\n");
-
-        for (int i = 0; i < res.get_n_tuples(); i++) {
-            for (int j = 0; j < nFields; j++) {
-                stdout.printf ("%-15s", res.get_value (i, j));
-            }
-            stdout.printf ("\n");
-        }
-
-        stdout.printf("\n[%d Rows...]\n", res.get_n_tuples());
-*/
-
         return list;
     }
 
@@ -121,13 +113,17 @@ public class PostgreSQL : Object {
              list += di;
         }
 
+        return list;
+    }
+
+
+
 /*
         int nFields = res.get_n_fields ();
         for (int i = 0; i < nFields; i++) {
             stdout.printf ("%-15s", res.get_field_name (i));
         }
         stdout.printf ("\n");
-
 
         for (int i = 0; i < res.get_n_tuples(); i++) {
             for (int j = 0; j < nFields; j++) {
@@ -138,11 +134,6 @@ public class PostgreSQL : Object {
 
         stdout.printf("\n[%d Rows...]\n", res.get_n_tuples());
 */
-        return list;
-    }
-
-
-
 
    ~PostgreSQL() {
 		if (database != null) {

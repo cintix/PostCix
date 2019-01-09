@@ -14,6 +14,8 @@ public class FavoriteWindow : Gtk.Window {
 		title = "PostgreSQL Client";
 		set_default_size(700,420);
 		window_position = Gtk.WindowPosition.CENTER;
+		icon = imanager.load_image_into_buffer(".postcix/img/baby.png", 300,250);
+
 
 		Grid layoutGrid = new Gtk.Grid();
 
