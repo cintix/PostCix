@@ -279,6 +279,11 @@ SELECT pg_type.typname AS enumtype,
 			result_view.remove_column(tvc);
 		}
 
+        result_view.set_enable_tree_lines(true);
+        result_view.set_grid_lines(TreeViewGridLines.BOTH);
+        result_view.set_rules_hint(true);
+
+
 		stdout.printf("Ahh there you are, I made a SQL\n ");
 
 		if (res == null) {
@@ -298,9 +303,16 @@ SELECT pg_type.typname AS enumtype,
     	GLib.Type[] column_types = new GLib.Type[nFields + 1];
 		stdout.printf("build result columns\n");
     	for (int i  =0; i < nFields; i ++ ) {
-	        result_view.insert_column_with_attributes (-1, res.get_field_name(i), new CellRendererText (), "text", i, null);
+    	    CellRendererText  crt = new CellRendererText ();
+    	    crt.editable = true;
+    	   // crt.resizable = true;
+    	   // crt.width = 150;
+    	   //
+    	   int type_id = (int) res.get_field_type(i);
+
+	        result_view.insert_column_with_attributes (-1, res.get_field_name(i), crt, "text", i, null);
 	        column_types[i] = typeof(string);
-	        stdout.printf("		column Column " + res.get_field_name(i) + "\n");
+	        stdout.printf("		column Column " + res.get_field_name(i) + " type: "  + type_id.to_string() + "\n");
     	}
 		column_types[nFields] = typeof (string);
 
@@ -312,7 +324,7 @@ SELECT pg_type.typname AS enumtype,
         for (int j  =0; j < res.get_n_tuples(); j ++ ) {
 		    store.append (out root, null);
 			for (int i  =0; i < nFields; i ++ ) {
-			    store.set(root,i,res.get_value(j,i), 1, "String", -1);
+			    store.set(root,i,res.get_value(j,i), 1, res.get_value(j,i), -1);
 			}
     	}
 
