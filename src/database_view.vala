@@ -50,7 +50,7 @@ public class DatabaseView : Gtk.Window {
 		title = "PostgreSQL - " + item.nickname;
 		set_default_size(800,600);
 		window_position = Gtk.WindowPosition.CENTER;
-		icon = imanager.load_image_into_buffer(".postcix/img/baby.png", 300,250);
+		icon = imanager.load_image_into_buffer(".postcix/img/app_icon.png", 300,300);
 
 		favorite.hide();
 
@@ -213,6 +213,7 @@ SELECT pg_type.typname AS enumtype,
 				stdout.printf("executing SQL %s \n", source_view.buffer.text);
 				build_result(treeviewResults, database.query(source_view.buffer.text));
 				treeviewResults.columns_autosize();
+				return true;
 			}
 		}
 		return false;
@@ -305,26 +306,23 @@ SELECT pg_type.typname AS enumtype,
     	for (int i  =0; i < nFields; i ++ ) {
     	    CellRendererText  crt = new CellRendererText ();
     	    crt.editable = true;
-    	   // crt.resizable = true;
-    	   // crt.width = 150;
-    	   //
-    	   int type_id = (int) res.get_field_type(i);
-
+	        int type_id = (int) res.get_field_type(i);
 	        result_view.insert_column_with_attributes (-1, res.get_field_name(i), crt, "text", i, null);
 	        column_types[i] = typeof(string);
 	        stdout.printf("		column Column " + res.get_field_name(i) + " type: "  + type_id.to_string() + "\n");
     	}
+
 		column_types[nFields] = typeof (string);
 
         TreeIter root = new TreeIter();
-		Gtk.TreeStore store = new Gtk.TreeStore.newv(column_types);
+		Gtk.ListStore store = new Gtk.ListStore.newv(column_types);
         result_view.set_model (store);
         result_view.set_headers_visible(true);
 
-        for (int j  =0; j < res.get_n_tuples(); j ++ ) {
-		    store.append (out root, null);
-			for (int i  =0; i < nFields; i ++ ) {
-			    store.set(root,i,res.get_value(j,i), 1, res.get_value(j,i), -1);
+        for (int row  =0; row < res.get_n_tuples(); row++ ) {
+		    store.append (out root);
+			for (int col  =0; col < nFields; col++ ) {
+			    store.set(root,col,res.get_value(row,col), -1);
 			}
     	}
 

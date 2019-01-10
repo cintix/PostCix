@@ -8,4 +8,3 @@ postcix_LDFLAGS = -I/usr/include/postgresql
 postcix_LDADD = $(POSTCIX_LIBS)
 
 -include $(top_srcdir)/git.mk
-

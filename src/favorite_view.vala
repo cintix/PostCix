@@ -14,8 +14,8 @@ public class FavoriteWindow : Gtk.Window {
 		title = "PostgreSQL Client";
 		set_default_size(700,420);
 		window_position = Gtk.WindowPosition.CENTER;
-		icon = imanager.load_image_into_buffer(".postcix/img/baby.png", 300,250);
-
+		icon = imanager.load_image_into_buffer(".postcix/img/app_icon.png", 300,300);
+		resizable = false;
 
 		Grid layoutGrid = new Gtk.Grid();
 
@@ -75,6 +75,7 @@ public class FavoriteWindow : Gtk.Window {
             });
 
 			hi.button_press_event.connect((event) => { return delete_favorite(event, hi); });
+			hi.hexpand = true;
             grid.attach(hi, 0, item_index,1,1);
             item_index++;
         }

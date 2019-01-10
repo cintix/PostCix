@@ -57,33 +57,3 @@ public class Map<K,V> : GLib.Object {
     }
 }
 
-
-int main (string[] args) {
-
-	Map<int,string> my_map = new Map<int,string>();
-
-	my_map.set_key(2610, "Rødover");
-	my_map.set_key(2620, "Albertslund");
-	my_map.set_key(2630, "Høje Tåstrup");
-	my_map.set_key(2600, "Glostrup");
-
-	int[] zip_codes = {2600,2610,2620,2630};
-
-
-	foreach (int post_number in zip_codes) {
-		string city = my_map.get_key(post_number);
-		if (city == null) continue;
-		stdout.printf("Byen %s har post nummeret %d\n", city , post_number);
-	}
-
-	my_map.remove(2610);
-	stdout.printf("Removing Rødover,,,\n\n");
-	foreach (int post_number in zip_codes) {
-		string city = my_map.get_key(post_number);
-		if (city == null) continue;
-		stdout.printf("Byen %s har post nummeret %d\n", city, post_number);
-	}
-
-
-    return 0;
-}
