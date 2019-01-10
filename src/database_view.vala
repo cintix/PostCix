@@ -33,6 +33,11 @@ public class DatabaseView : Gtk.Window {
 		this.database = _p;
 		this.item = _h;
 
+
+		string my_css = ".sourceCode { font-size: 16px; }";
+
+		apply_custom_css(my_css);
+
 		GLib.print ("Listing languages \n");
     	var ids = language_manager.get_language_ids ();
 		foreach (var id in ids) {
@@ -147,6 +152,8 @@ public class DatabaseView : Gtk.Window {
 
 
 		source_view = new Gtk.SourceView.with_buffer (buffer);
+		source_view.get_style_context().add_class("sourceCode");
+
 		source_view.key_press_event.connect(SQL_keypress);
         source_view.set_wrap_mode (Gtk.WrapMode.WORD);
         source_view.highlight_current_line = true;
@@ -409,5 +416,23 @@ SELECT pg_type.typname AS enumtype,
         favorite.show_all();
 		this.close;
 	}
+
+
+
+
+	/*
+	 * Apply Css styles to document
+	 */
+	private void apply_custom_css(string cssString) {
+		try {
+		    Gtk.CssProvider css_provider = new Gtk.CssProvider ();
+		    css_provider.load_from_data(cssString, cssString.length);
+		    Gtk.StyleContext.add_provider_for_screen (Gdk.Screen.get_default (), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+		} catch (Error e) {
+			return;
+		}
+		return;
+	}
+
 
 }

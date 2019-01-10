@@ -46,6 +46,7 @@ public class MyWebkitWindow : Gtk.Window {
 
         public static int main (string[] args) {
         Gtk.init (ref args);
+        Gtk.show_uri_on_window(null, "http://www.tv2.dk",1);
 
         var my_webkit_window = new MyWebkitWindow ();
 
