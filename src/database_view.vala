@@ -217,7 +217,6 @@ SELECT pg_type.typname AS enumtype,
 	private bool SQL_keypress(EventKey event) {
 		if (event.state.to_string() == "GDK_CONTROL_MASK") {
 			if (event.keyval == 0xff0d) {
-				stdout.printf("executing SQL %s \n", source_view.buffer.text);
 				build_result(treeviewResults, database.query(source_view.buffer.text));
 				treeviewResults.columns_autosize();
 				return true;
@@ -251,13 +250,10 @@ SELECT pg_type.typname AS enumtype,
 			}
 
 			if (command != "#SQL") {
-				stdout.printf("Sending SQL to builder %s \n", command);
 				build_result(treeviewResults, database.query("select * from " + command + " limit 1000"));
-				stdout.printf("Sending SQL to builder %s \n", "select * from " + command + " limit 1000");
 				treeviewResults.columns_autosize();
 			}
 
-			stdout.printf("You clicked %s \n",command);
 		}
 
 	}
@@ -279,11 +275,8 @@ SELECT pg_type.typname AS enumtype,
 	}
 
     private void build_result (TreeView result_view, Result res) {
-		stdout.printf("Hello anyone home ? \n");
-
 		if (result_view != null && result_view.get_columns() != null)
 		foreach(TreeViewColumn tvc in result_view.get_columns()) {
-			stdout.printf("Why am i here\n");
 			result_view.remove_column(tvc);
 		}
 
@@ -291,32 +284,37 @@ SELECT pg_type.typname AS enumtype,
         result_view.set_grid_lines(TreeViewGridLines.BOTH);
         result_view.set_rules_hint(true);
 
-
-		stdout.printf("Ahh there you are, I made a SQL\n ");
-
 		if (res == null) {
-		  stdout.printf("Sorry you have no results from the SQL \n");
 		  return;
 		} else {
 	        if (res.get_status () != ExecStatus.TUPLES_OK) {
 	        	return;
 	        }
-	  	    stdout.printf("building table from results from the SQL \n");
         }
 
 
 
 		int nFields = res.get_n_fields ();
-		stdout.printf("fields from SQL %d \n ", nFields);
     	GLib.Type[] column_types = new GLib.Type[nFields + 1];
-		stdout.printf("build result columns\n");
     	for (int i  =0; i < nFields; i ++ ) {
-    	    CellRendererText  crt = new CellRendererText ();
-    	    crt.editable = true;
-	        int type_id = (int) res.get_field_type(i);
-	        result_view.insert_column_with_attributes (-1, res.get_field_name(i), crt, "text", i, null);
-	        column_types[i] = typeof(string);
-	        stdout.printf("		column Column " + res.get_field_name(i) + " type: "  + type_id.to_string() + "\n");
+
+    		string field_type = database.get_field_type((int) res.get_field_type(i));
+
+			if (field_type == "bool") {
+			    CellRendererToggle  crt = new CellRendererToggle ();
+//			    crt.editable = true;
+			    result_view.insert_column_with_attributes (-1, res.get_field_name(i), crt, "active", i, null);
+			    column_types[i] = typeof(bool);
+			} else {
+			    CellRendererText  crt = new CellRendererText ();
+			    crt.editable = true;
+			    if (i > 0) {
+					crt.single_paragraph_mode = true;
+				}
+
+			    result_view.insert_column_with_attributes (-1, res.get_field_name(i), crt, "text", i, null);
+			    column_types[i] = typeof(string);
+	        }
     	}
 
 		column_types[nFields] = typeof (string);
@@ -329,13 +327,18 @@ SELECT pg_type.typname AS enumtype,
         for (int row  =0; row < res.get_n_tuples(); row++ ) {
 		    store.append (out root);
 			for (int col  =0; col < nFields; col++ ) {
-			    store.set(root,col,res.get_value(row,col), -1);
+				if (column_types[col] == typeof(string)) {
+			    	store.set(root,col,res.get_value(row,col), -1);
+			    }
+
+				if (column_types[col] == typeof(bool)) {
+			    	store.set(root,col,(res.get_value(row,col) == "t" ? true : false), -1);
+			    }
+
 			}
     	}
 
 		result_view.show_all();
-
-		stdout.printf("return new result view\n");
 	}
 
     private void setup_treeview (TreeView view) {

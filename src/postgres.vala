@@ -8,6 +8,8 @@ using Postgres;
 
 public class PostgreSQL : Object {
     public HostItem item;
+    public Map<int, string> types = new Map<int,string>();
+
     private Database database;
 
     public PostgreSQL() {
@@ -29,9 +31,27 @@ public class PostgreSQL : Object {
             return ;
         }
 
-		stdout.printf("Connected to %s \n", _item.database_name);
+		stdout.printf("Building types overview\n");
+
+		Result res = query("select oid, typname from pg_type;");
+        if (res.get_status () != ExecStatus.TUPLES_OK) {
+            stderr.printf ("SQL failed: %s", database.get_error_message ());
+            return;
+        }
+
+        for (int i = 0; i < res.get_n_tuples(); i++) {
+        	stdout.printf("type %s id %s\n",res.get_value (i, 0),res.get_value (i, 1));
+			types.set_key(int.parse(res.get_value (i, 0)), res.get_value (i, 1));
+        }
+
 
     }
+
+
+	public string get_field_type(int type_id) {
+		return types.get_key(type_id);
+	}
+
 
 	public Result query(string sql) {
 
