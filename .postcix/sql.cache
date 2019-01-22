@@ -1,0 +1,6 @@
+select * from programs;
+
+
+select * from import;
+
+select * from program;

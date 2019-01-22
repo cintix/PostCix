@@ -11,6 +11,7 @@ public class DatabaseView : Gtk.Window {
 	private PostgreSQL database;
 	private HostItem item;
 
+
 	private ImageManager imanager = new ImageManager();
     private Setting settings = new Setting(File.new_for_path (".postcix/settings.conf"));
     private Grid grid = new Gtk.Grid();
@@ -23,6 +24,7 @@ public class DatabaseView : Gtk.Window {
 	private string[] database_list;
 	private int selected_database_index = 0;
 
+	private File cacheSQLFile = File.new_for_path (".postcix/sql.cache");
 
     /*
      * Setup database view
@@ -38,17 +40,10 @@ public class DatabaseView : Gtk.Window {
 
 		apply_custom_css(my_css);
 
-		GLib.print ("Listing languages \n");
-    	var ids = language_manager.get_language_ids ();
-		foreach (var id in ids) {
-		    var lang = language_manager.get_language (id);
-		    GLib.print ("lang name %s/\n", lang.name);
-		}
-
-
         foreach (string db in database.get_databases()) {
             stdout.printf("Database : %s\n", db);
         }
+
         stdout.printf("============================\n\n");
 
 		destroy.connect(this.close_and_show_favorits);
@@ -160,7 +155,7 @@ public class DatabaseView : Gtk.Window {
 		source_view.indent_width = 4;
 		source_view.indent_on_tab = true;
 		source_view.show_line_numbers = true;
-        source_view.buffer.text = "";
+        source_view.buffer.text = IOHandler.read_file(cacheSQLFile);
 
 		ScrolledWindow source_view_scrolled_window = new Gtk.ScrolledWindow (null, null);
         source_view_scrolled_window.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
@@ -215,8 +210,36 @@ SELECT pg_type.typname AS enumtype,
 	}
 
 	private bool SQL_keypress(EventKey event) {
+
+
+		IOHandler.write_file(cacheSQLFile, source_view.buffer.text);
+
 		if (event.state.to_string() == "GDK_CONTROL_MASK") {
 			if (event.keyval == 0xff0d) {
+				TextBuffer buffer = source_view.get_buffer();
+
+				int refpoint = buffer.cursor_position;
+
+				stdout.printf("cursor at %d \n" , refpoint);
+				if (buffer.get_has_selection ()) {
+					TextIter selection_start;
+					TextIter selection_end;
+
+					buffer.get_selection_bounds(out selection_start, out selection_end);
+
+					string selection_sql = buffer.get_text(selection_start, selection_end, true);
+
+
+					stdout.printf("Using selection text  %s \n" , selection_sql);
+				    build_result(treeviewResults, database.query(selection_sql));
+					treeviewResults.columns_autosize();
+
+					return true;
+				}
+
+
+
+
 				build_result(treeviewResults, database.query(source_view.buffer.text));
 				treeviewResults.columns_autosize();
 				return true;
