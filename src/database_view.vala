@@ -211,12 +211,13 @@ SELECT pg_type.typname AS enumtype,
 
 	private bool SQL_keypress(EventKey event) {
 
-
-		IOHandler.write_file(cacheSQLFile, source_view.buffer.text);
+		TextBuffer buffer = source_view.get_buffer();
+		if (buffer.get_modified()) {
+			IOHandler.write_file(cacheSQLFile, source_view.buffer.text);
+		}
 
 		if (event.state.to_string() == "GDK_CONTROL_MASK") {
 			if (event.keyval == 0xff0d) {
-				TextBuffer buffer = source_view.get_buffer();
 
 				int refpoint = buffer.cursor_position;
 
@@ -325,7 +326,6 @@ SELECT pg_type.typname AS enumtype,
 
 			if (field_type == "bool") {
 			    CellRendererToggle  crt = new CellRendererToggle ();
-//			    crt.editable = true;
 			    result_view.insert_column_with_attributes (-1, res.get_field_name(i), crt, "active", i, null);
 			    column_types[i] = typeof(bool);
 			} else {
@@ -338,6 +338,10 @@ SELECT pg_type.typname AS enumtype,
 			    result_view.insert_column_with_attributes (-1, res.get_field_name(i), crt, "text", i, null);
 			    column_types[i] = typeof(string);
 	        }
+
+	        result_view.get_column(i).set_sort_column_id(i);
+	        result_view.get_column(i).set_sort_order((i == 0) ? SortType.ASCENDING : SortType.DESCENDING);
+	        result_view.get_column(i).clicked.connect(tv_header_clicked);
     	}
 
 		column_types[nFields] = typeof (string);
@@ -360,8 +364,18 @@ SELECT pg_type.typname AS enumtype,
 
 			}
     	}
-
+		result_view.set_headers_clickable(true);
 		result_view.show_all();
+	}
+
+
+	private void tv_header_clicked(Gtk.TreeViewColumn _column){
+		stdout.printf("Okay so i got called by column %s \n", _column.get_title ());
+		if (_column.get_sort_order() == SortType.ASCENDING) {
+			_column.set_sort_order(SortType.DESCENDING);
+		} else {
+			_column.set_sort_order(SortType.ASCENDING);
+		}
 	}
 
     private void setup_treeview (TreeView view) {
