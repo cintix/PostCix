@@ -317,16 +317,18 @@ SELECT pg_type.typname AS enumtype,
         }
 
 
-
+		// label = "Hitme";
 		int nFields = res.get_n_fields ();
     	GLib.Type[] column_types = new GLib.Type[nFields + 1];
     	for (int i  =0; i < nFields; i ++ ) {
-
+			stdout.printf("field column name %s \n", res.get_field_name(i));
     		string field_type = database.get_field_type((int) res.get_field_type(i));
+			string field_name = res.get_field_name(i);
+			field_name = field_name.replace("_","__");
 
 			if (field_type == "bool") {
 			    CellRendererToggle  crt = new CellRendererToggle ();
-			    result_view.insert_column_with_attributes (-1, res.get_field_name(i), crt, "active", i, null);
+			    result_view.insert_column_with_attributes (-1, field_name, crt, "active", i, null);
 			    column_types[i] = typeof(bool);
 			} else {
 			    CellRendererText  crt = new CellRendererText ();
@@ -335,7 +337,7 @@ SELECT pg_type.typname AS enumtype,
 					crt.single_paragraph_mode = true;
 				}
 
-			    result_view.insert_column_with_attributes (-1, res.get_field_name(i), crt, "text", i, null);
+			    result_view.insert_column_with_attributes (-1, field_name, crt, "text", i, null);
 			    column_types[i] = typeof(string);
 	        }
 
