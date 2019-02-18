@@ -19,7 +19,7 @@ using WebKit;
 
 public class MyWebkitWindow : Gtk.Window {
 
-    private const string BROWSER_TITLE = "Youtube Music";
+    private const string BROWSER_TITLE = "Mixer";
 
     private WebKit.WebView web_view; //This is the widget that shows the page
     public MyWebkitWindow () {}
@@ -34,9 +34,9 @@ public class MyWebkitWindow : Gtk.Window {
         web_view = new WebKit.WebView ();
         CookieManager cookiemanager = web_view.get_context().get_cookie_manager();
         cookiemanager.set_accept_policy(CookieAcceptPolicy.ALWAYS);
-        cookiemanager.set_persistent_storage("/tmp/ymusic", CookiePersistentStorage.TEXT);
+        cookiemanager.set_persistent_storage("/tmp/mixer", CookiePersistentStorage.TEXT);
 
-        web_view.load_uri ("http://music.youtube.com");
+        web_view.load_uri ("http://mixer.com");
 
         var scrolled_window = new Gtk.ScrolledWindow (null, null); //The WebView doesn't contain scroll bars by its own.
         scrolled_window.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
